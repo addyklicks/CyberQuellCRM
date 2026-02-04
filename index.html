@@ -583,6 +583,33 @@
 
         .lead-count strong { color: var(--racing-green); }
 
+        .bulk-actions {
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--white);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 10px;
+            margin: 0 1.25rem 0.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .bulk-actions.visible { display: flex; }
+
+        .bulk-count {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .bulk-actions select {
+            padding: 0.35rem 0.6rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            background: var(--white);
+        }
+
         /* Content Area */
         .content-area {
             flex: 1;
@@ -603,7 +630,7 @@
 
         .analytics-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(8, 1fr);
             gap: 0.75rem;
         }
 
@@ -630,6 +657,7 @@
         .stat-card.negotiation::before { background: var(--status-negotiation); }
         .stat-card.won::before { background: var(--status-won); }
         .stat-card.lost::before { background: var(--status-lost); }
+        .stat-card.meta::before { background: var(--watercourse); }
 
         .stat-label {
             font-size: 0.7rem;
@@ -924,6 +952,12 @@
             color: var(--text-muted);
         }
 
+        .lead-purpose {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
         .table-status {
             display: inline-flex;
             align-items: center;
@@ -946,6 +980,11 @@
             font-weight: 600;
             color: var(--watercourse);
             font-size: 0.85rem;
+        }
+
+        .row-select {
+            width: 16px;
+            height: 16px;
         }
 
         /* Modal */
@@ -1535,6 +1574,16 @@
                             <div class="stat-value" id="stat-lost">0</div>
                             <div class="stat-amount" id="stat-lost-amount">$0</div>
                         </div>
+                        <div class="stat-card meta">
+                            <div class="stat-label">Conversion</div>
+                            <div class="stat-value" id="stat-conversion">0%</div>
+                            <div class="stat-amount" id="stat-conversion-sub">Win rate</div>
+                        </div>
+                        <div class="stat-card meta">
+                            <div class="stat-label">Avg Time in Stage</div>
+                            <div class="stat-value" id="stat-avg-stage">0d</div>
+                            <div class="stat-amount" id="stat-avg-stage-sub">All leads</div>
+                        </div>
                     </div>
                 </div>
 
@@ -1543,14 +1592,34 @@
                 </div>
 
                 <div class="list-view" id="list-view">
+                    <div class="bulk-actions" id="bulk-actions">
+                        <span class="bulk-count" id="bulk-count">0 selected</span>
+                        <select id="bulk-status">
+                            <option value="">Change status...</option>
+                            <option value="new">New</option>
+                            <option value="contacted">Contacted</option>
+                            <option value="qualified">Qualified</option>
+                            <option value="negotiation">Negotiation</option>
+                            <option value="won">Won</option>
+                            <option value="lost">Lost</option>
+                        </select>
+                        <button class="btn btn-primary" type="button" id="bulk-apply-btn">
+                            <i class="fas fa-layer-group"></i> Apply
+                        </button>
+                    </div>
                     <table class="leads-table">
                         <thead>
                             <tr>
+                                <th>
+                                    <input type="checkbox" class="row-select" id="select-all">
+                                </th>
                                 <th data-sort="name">Lead <i class="fas fa-sort"></i></th>
+                                <th>Lead For</th>
                                 <th data-sort="status">Status <i class="fas fa-sort"></i></th>
                                 <th data-sort="value">Value <i class="fas fa-sort"></i></th>
                                 <th>Tags</th>
                                 <th data-sort="assignee">Assignee <i class="fas fa-sort"></i></th>
+                                <th>First Follow-up</th>
                                 <th data-sort="created">Created <i class="fas fa-sort"></i></th>
                             </tr>
                         </thead>
@@ -1627,6 +1696,16 @@
                                 <select id="lead-assignee"></select>
                             </div>
                         </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lead-purpose">What is this lead for?</label>
+                                <input type="text" id="lead-purpose" placeholder="e.g., MDR renewal, SOC buildout">
+                            </div>
+                            <div class="form-group">
+                                <label for="lead-first-followup">First Follow-up Sent</label>
+                                <input type="date" id="lead-first-followup">
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-section">
                         <h3 class="modal-section-title">Tags</h3>
@@ -1676,7 +1755,7 @@
                 </div>
                 <div class="modal-footer-right">
                     <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
-                    <button type="submit" form="lead-form" class="btn btn-primary">
+                    <button type="submit" form="lead-form" class="btn btn-primary" id="save-lead-btn">
                         <i class="fas fa-check"></i> Save Lead
                     </button>
                 </div>
@@ -1710,19 +1789,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
 
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDILL312HfMWHSl_mvsV5FgN4gNDXdzicc",
-            authDomain: "cyberquellcrm.firebaseapp.com",
-            projectId: "cyberquellcrm",
-            storageBucket: "cyberquellcrm.firebasestorage.app",
-            messagingSenderId: "966187396196",
-            appId: "1:966187396196:web:b210b43346ec4b1ff5c371",
-            measurementId: "G-9WP1LP52MM"
-        };
-
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
@@ -1740,6 +1809,7 @@
 
         // State
         let currentUser = null;
+        let currentUserRole = 'member';
         let leads = [];
         let teamMembers = [];
         let currentFilter = {};
@@ -1747,6 +1817,9 @@
         let editingLeadId = null;
         let unsubscribeLeads = null;
         let unsubscribeTeam = null;
+        let heartbeatInterval = null;
+        let lastRenderedLeadIds = [];
+        const selectedLeadIds = new Set();
 
         // DOM Elements
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -1766,6 +1839,27 @@
         // Utility Functions
         // =====================================
 
+        function escapeHTML(value) {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function toDate(value) {
+            if (!value) return null;
+            if (value.toDate) return value.toDate();
+            if (value instanceof Date) return value;
+            if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                return new Date(`${value}T00:00:00`);
+            }
+            if (typeof value === 'string' || typeof value === 'number') return new Date(value);
+            return null;
+        }
+
         function formatCurrency(amount) {
             if (!amount) return '$0';
             return new Intl.NumberFormat('en-US', {
@@ -1777,14 +1871,14 @@
         }
 
         function formatDate(timestamp) {
-            if (!timestamp) return '-';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const date = toDate(timestamp);
+            if (!date || Number.isNaN(date.getTime())) return '-';
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
         function getTimeAgo(timestamp) {
-            if (!timestamp) return '';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const date = toDate(timestamp);
+            if (!date) return 'Just now';
             const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
             const intervals = [
                 { label: 'year', seconds: 31536000 },
@@ -1801,6 +1895,11 @@
             return 'Just now';
         }
 
+        function getTimestampValue(value) {
+            const date = toDate(value);
+            return date ? date.getTime() : 0;
+        }
+
         function getInitials(name) {
             if (!name) return '?';
             return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -1808,6 +1907,15 @@
 
         function getTeamMember(id) {
             return teamMembers.find(m => m.id === id) || { name: 'Unassigned', photoURL: null };
+        }
+
+        function isManagerOrAdmin() {
+            return currentUserRole === 'admin' || currentUserRole === 'manager';
+        }
+
+        function canEditLead(lead) {
+            if (!lead || isManagerOrAdmin()) return true;
+            return lead.assignee === currentUser?.uid;
         }
 
         function showToast(message, type = 'info') {
@@ -1824,6 +1932,12 @@
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
+        }
+
+        function updateBulkActionsVisibility() {
+            const bulk = document.getElementById('bulk-actions');
+            if (!bulk) return;
+            bulk.classList.toggle('visible', isManagerOrAdmin());
         }
 
         function debounce(func, wait) {
@@ -1852,6 +1966,7 @@
             try {
                 if (unsubscribeLeads) unsubscribeLeads();
                 if (unsubscribeTeam) unsubscribeTeam();
+                if (heartbeatInterval) clearInterval(heartbeatInterval);
                 await auth.signOut();
             } catch (error) {
                 console.error('Sign out error:', error);
@@ -1866,6 +1981,8 @@
                 setupRealtimeListeners();
             } else {
                 currentUser = null;
+                currentUserRole = 'member';
+                if (heartbeatInterval) clearInterval(heartbeatInterval);
                 showLogin();
             }
         });
@@ -1883,11 +2000,27 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                 });
+                currentUserRole = 'member';
             } else {
+                currentUserRole = userDoc.data().role || 'member';
                 await userRef.update({
                     lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }
+        }
+
+        async function updateLastSeen() {
+            if (!currentUser) return;
+            const userRef = db.collection('users').doc(currentUser.uid);
+            await userRef.update({
+                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        function startHeartbeat() {
+            if (heartbeatInterval) clearInterval(heartbeatInterval);
+            updateLastSeen();
+            heartbeatInterval = setInterval(updateLastSeen, 60 * 1000);
         }
 
         function showLogin() {
@@ -1900,6 +2033,8 @@
             loadingOverlay.classList.add('hidden');
             loginPage.classList.add('hidden');
             app.classList.add('active');
+            startHeartbeat();
+            updateBulkActionsVisibility();
 
             // Update user info in sidebar
             document.getElementById('user-avatar').src = currentUser.photoURL || '';
@@ -1934,6 +2069,11 @@
                         id: doc.id,
                         ...doc.data()
                     }));
+                    const self = teamMembers.find(m => m.id === currentUser?.uid);
+                    if (self?.role && self.role !== currentUserRole) {
+                        currentUserRole = self.role;
+                        updateBulkActionsVisibility();
+                    }
                     updateAssigneeDropdowns();
                     updateOnlineUsers();
                 }, (error) => {
@@ -1976,10 +2116,10 @@
             }).slice(0, 4);
 
             container.innerHTML = onlineMembers.map(member => `
-                <div class="online-user" title="${member.name} (online)" style="position: relative;">
+                <div class="online-user" title="${escapeHTML(member.name)} (online)" style="position: relative;">
                     ${member.photoURL 
-                        ? `<img src="${member.photoURL}" alt="${member.name}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`
-                        : getInitials(member.name)
+                        ? `<img src="${member.photoURL}" alt="${escapeHTML(member.name)}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`
+                        : escapeHTML(getInitials(member.name))
                     }
                     <span class="online-indicator"></span>
                 </div>
@@ -1992,6 +2132,13 @@
 
         async function saveLead(leadData) {
             try {
+                if (leadData.id) {
+                    const existing = leads.find(l => l.id === leadData.id);
+                    if (!canEditLead(existing)) {
+                        showToast('You do not have permission to edit this lead', 'error');
+                        return;
+                    }
+                }
                 if (leadData.id) {
                     // Update existing lead
                     await db.collection('leads').doc(leadData.id).update({
@@ -2019,6 +2166,10 @@
 
         async function deleteLead(leadId) {
             try {
+                if (!isManagerOrAdmin()) {
+                    showToast('Only managers or admins can delete leads', 'error');
+                    return;
+                }
                 await db.collection('leads').doc(leadId).delete();
                 showToast('Lead deleted', 'success');
             } catch (error) {
@@ -2030,7 +2181,11 @@
         async function updateLeadStatus(leadId, newStatus) {
             try {
                 const lead = leads.find(l => l.id === leadId);
-                const oldStatus = lead?.status;
+                if (!canEditLead(lead)) {
+                    showToast('You do not have permission to update this lead', 'error');
+                    return;
+                }
+                const oldStatus = lead?.status || 'unknown';
 
                 await db.collection('leads').doc(leadId).update({
                     status: newStatus,
@@ -2042,7 +2197,7 @@
                         userId: currentUser.uid,
                         userName: currentUser.displayName,
                         userPhoto: currentUser.photoURL,
-                        timestamp: new Date().toISOString()
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     })
                 });
                 showToast(`Lead moved to ${newStatus}`, 'success');
@@ -2054,6 +2209,11 @@
 
         async function addComment(leadId, text) {
             try {
+                const lead = leads.find(l => l.id === leadId);
+                if (!canEditLead(lead)) {
+                    showToast('You do not have permission to comment on this lead', 'error');
+                    return;
+                }
                 await db.collection('leads').doc(leadId).update({
                     activities: firebase.firestore.FieldValue.arrayUnion({
                         type: 'comment',
@@ -2061,7 +2221,7 @@
                         userId: currentUser.uid,
                         userName: currentUser.displayName,
                         userPhoto: currentUser.photoURL,
-                        timestamp: new Date().toISOString()
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     }),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -2085,7 +2245,8 @@
                 filtered = filtered.filter(lead =>
                     (lead.name && lead.name.toLowerCase().includes(search)) ||
                     (lead.company && lead.company.toLowerCase().includes(search)) ||
-                    (lead.email && lead.email.toLowerCase().includes(search))
+                    (lead.email && lead.email.toLowerCase().includes(search)) ||
+                    (lead.leadPurpose && lead.leadPurpose.toLowerCase().includes(search))
                 );
             }
 
@@ -2175,8 +2336,11 @@
         function renderLeadCard(lead) {
             const assignee = getTeamMember(lead.assignee);
             const tagsHtml = lead.tags?.length 
-                ? lead.tags.map(tag => `<span class="lead-tag ${tag}">${tag.replace('-', ' ')}</span>`).join('')
+                ? lead.tags.map(tag => `<span class="lead-tag ${tag}">${escapeHTML(tag.replace('-', ' '))}</span>`).join('')
                 : '';
+            const safeName = escapeHTML(lead.name || 'Untitled');
+            const safeCompany = escapeHTML(lead.company || '');
+            const safePurpose = escapeHTML(lead.leadPurpose || '');
 
             return `
                 <div class="lead-card" draggable="true" data-lead-id="${lead.id}">
@@ -2184,14 +2348,15 @@
                         <span class="lead-id">#${lead.id.slice(-6).toUpperCase()}</span>
                         <span class="lead-priority ${lead.priority || 'medium'}"></span>
                     </div>
-                    <div class="lead-title">${lead.name || 'Untitled'}</div>
-                    ${lead.company ? `<div class="lead-company">${lead.company}</div>` : ''}
+                    <div class="lead-title">${safeName}</div>
+                    ${safeCompany ? `<div class="lead-company">${safeCompany}</div>` : ''}
+                    ${safePurpose ? `<div class="lead-purpose">For: ${safePurpose}</div>` : ''}
                     ${tagsHtml ? `<div class="lead-tags">${tagsHtml}</div>` : ''}
                     <div class="lead-footer">
-                        <div class="lead-assignee" title="${assignee.name}">
+                        <div class="lead-assignee" title="${escapeHTML(assignee.name)}">
                             ${assignee.photoURL 
                                 ? `<img src="${assignee.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
-                                : getInitials(assignee.name)
+                                : escapeHTML(getInitials(assignee.name))
                             }
                         </div>
                         <div class="lead-meta">
@@ -2206,44 +2371,136 @@
         function renderListView() {
             const filteredLeads = getFilteredLeads();
 
+            lastRenderedLeadIds = filteredLeads.map(lead => lead.id);
+            selectedLeadIds.forEach(id => {
+                if (!lastRenderedLeadIds.includes(id)) selectedLeadIds.delete(id);
+            });
+
             leadsTableBody.innerHTML = filteredLeads.map(lead => {
                 const assignee = getTeamMember(lead.assignee);
                 const tagsHtml = lead.tags?.length 
-                    ? lead.tags.map(tag => `<span class="lead-tag ${tag}">${tag.replace('-', ' ')}</span>`).join('')
+                    ? lead.tags.map(tag => `<span class="lead-tag ${tag}">${escapeHTML(tag.replace('-', ' '))}</span>`).join('')
                     : '-';
+                const safeName = escapeHTML(lead.name || 'Untitled');
+                const safeCompany = escapeHTML(lead.company || '-');
+                const safePurpose = escapeHTML(lead.leadPurpose || '-');
 
                 return `
                     <tr data-lead-id="${lead.id}">
                         <td>
+                            <input type="checkbox" class="row-select" data-lead-id="${lead.id}" ${selectedLeadIds.has(lead.id) ? 'checked' : ''} ${!isManagerOrAdmin() ? 'disabled' : ''}>
+                        </td>
+                        <td>
                             <div class="table-lead-name">
                                 <span class="lead-priority ${lead.priority || 'medium'}"></span>
                                 <div class="table-lead-info">
-                                    <span class="table-lead-title">${lead.name || 'Untitled'}</span>
-                                    <span class="table-lead-company">${lead.company || '-'}</span>
+                                    <span class="table-lead-title">${safeName}</span>
+                                    <span class="table-lead-company">${safeCompany}</span>
                                 </div>
                             </div>
                         </td>
+                        <td>${safePurpose}</td>
                         <td><span class="table-status ${lead.status}">${lead.status}</span></td>
                         <td class="table-value">${formatCurrency(lead.value)}</td>
                         <td>${tagsHtml}</td>
                         <td>
-                            <div class="lead-assignee" title="${assignee.name}">
+                            <div class="lead-assignee" title="${escapeHTML(assignee.name)}">
                                 ${assignee.photoURL 
                                     ? `<img src="${assignee.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
-                                    : getInitials(assignee.name)
+                                    : escapeHTML(getInitials(assignee.name))
                                 }
                             </div>
                         </td>
+                        <td>${formatDate(lead.firstFollowup)}</td>
                         <td>${formatDate(lead.createdAt)}</td>
                     </tr>
                 `;
             }).join('');
 
             leadsTableBody.querySelectorAll('tr').forEach(row => {
-                row.addEventListener('click', () => openLeadModal(row.dataset.leadId));
+                row.addEventListener('click', (e) => {
+                    if (e.target.closest('.row-select')) return;
+                    openLeadModal(row.dataset.leadId);
+                });
             });
 
+            leadsTableBody.querySelectorAll('.row-select').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const id = e.target.dataset.leadId;
+                    if (e.target.checked) selectedLeadIds.add(id);
+                    else selectedLeadIds.delete(id);
+                    updateBulkSelection();
+                });
+            });
+
+            updateBulkSelection();
+
             updateCounts(filteredLeads);
+        }
+
+        function updateBulkSelection() {
+            const bulkCount = document.getElementById('bulk-count');
+            const selectAll = document.getElementById('select-all');
+            const bulkStatus = document.getElementById('bulk-status');
+            const bulkApply = document.getElementById('bulk-apply-btn');
+
+            if (bulkCount) bulkCount.textContent = `${selectedLeadIds.size} selected`;
+            if (selectAll) {
+                const totalVisible = lastRenderedLeadIds.length;
+                const selectedVisible = lastRenderedLeadIds.filter(id => selectedLeadIds.has(id)).length;
+                selectAll.checked = totalVisible > 0 && selectedVisible === totalVisible;
+                selectAll.indeterminate = selectedVisible > 0 && selectedVisible < totalVisible;
+                selectAll.disabled = !isManagerOrAdmin();
+            }
+
+            const canBulk = isManagerOrAdmin() && selectedLeadIds.size > 0;
+            if (bulkStatus) bulkStatus.disabled = !canBulk;
+            if (bulkApply) bulkApply.disabled = !canBulk;
+        }
+
+        async function applyBulkStatus() {
+            const bulkStatus = document.getElementById('bulk-status');
+            const newStatus = bulkStatus?.value;
+            if (!isManagerOrAdmin()) {
+                showToast('Only managers or admins can run bulk actions', 'error');
+                return;
+            }
+            if (!newStatus) {
+                showToast('Pick a status to apply', 'error');
+                return;
+            }
+            if (selectedLeadIds.size === 0) return;
+
+            const batch = db.batch();
+            selectedLeadIds.forEach(id => {
+                const lead = leads.find(l => l.id === id);
+                const oldStatus = lead?.status || 'unknown';
+                const ref = db.collection('leads').doc(id);
+                batch.update(ref, {
+                    status: newStatus,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedBy: currentUser.uid,
+                    activities: firebase.firestore.FieldValue.arrayUnion({
+                        type: 'status',
+                        text: `Moved from ${oldStatus} to ${newStatus}`,
+                        userId: currentUser.uid,
+                        userName: currentUser.displayName,
+                        userPhoto: currentUser.photoURL,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    })
+                });
+            });
+
+            try {
+                await batch.commit();
+                showToast('Bulk status updated', 'success');
+                selectedLeadIds.clear();
+                if (bulkStatus) bulkStatus.value = '';
+                updateBulkSelection();
+            } catch (error) {
+                console.error('Bulk update error:', error);
+                showToast('Bulk update failed', 'error');
+            }
         }
 
         function updateCounts(filteredLeads) {
@@ -2264,6 +2521,26 @@
                 if (countEl) countEl.textContent = count;
                 if (amountEl) amountEl.textContent = formatCurrency(totalValue);
             });
+
+            const total = leads.length || 1;
+            const wonCount = leads.filter(l => l.status === 'won').length;
+            const conversionRate = Math.round((wonCount / total) * 100);
+            const conversionEl = document.getElementById('stat-conversion');
+            if (conversionEl) conversionEl.textContent = `${conversionRate}%`;
+
+            const avgStageEl = document.getElementById('stat-avg-stage');
+            if (avgStageEl) {
+                const now = Date.now();
+                const stageTimes = leads.map(lead => {
+                    const statusActivities = (lead.activities || []).filter(a => a.type === 'status');
+                    const latestStatus = statusActivities.sort((a, b) => getTimestampValue(b.timestamp) - getTimestampValue(a.timestamp))[0];
+                    const startTime = getTimestampValue(latestStatus?.timestamp) || getTimestampValue(lead.createdAt) || now;
+                    return Math.max(0, now - startTime);
+                });
+                const avgMs = stageTimes.length ? stageTimes.reduce((a, b) => a + b, 0) / stageTimes.length : 0;
+                const avgDays = Math.max(0, Math.round(avgMs / (1000 * 60 * 60 * 24)));
+                avgStageEl.textContent = `${avgDays}d`;
+            }
         }
 
         // =====================================
@@ -2278,6 +2555,12 @@
 
             cards.forEach(card => {
                 card.addEventListener('dragstart', (e) => {
+                    const lead = leads.find(l => l.id === card.dataset.leadId);
+                    if (!canEditLead(lead)) {
+                        e.preventDefault();
+                        showToast('You do not have permission to move this lead', 'error');
+                        return;
+                    }
                     draggedCard = card;
                     card.classList.add('dragging');
                 });
@@ -2321,7 +2604,6 @@
             const lead = leadId ? leads.find(l => l.id === leadId) : null;
 
             document.getElementById('modal-title').textContent = lead ? 'Edit Lead' : 'Add New Lead';
-            document.getElementById('delete-lead-btn').style.display = lead ? 'flex' : 'none';
             document.getElementById('activity-section').style.display = lead ? 'block' : 'none';
 
             // Populate form
@@ -2334,6 +2616,8 @@
             document.getElementById('lead-priority').value = lead?.priority || 'medium';
             document.getElementById('lead-value').value = lead?.value || '';
             document.getElementById('lead-assignee').value = lead?.assignee || currentUser.uid;
+            document.getElementById('lead-purpose').value = lead?.leadPurpose || '';
+            document.getElementById('lead-first-followup').value = lead?.firstFollowup || '';
             document.getElementById('lead-notes').value = lead?.notes || '';
 
             // Tags
@@ -2349,19 +2633,37 @@
                 renderActivities(lead.activities);
             }
 
+            const canEdit = !lead || canEditLead(lead);
+            setFormReadOnly(!canEdit);
+            document.getElementById('delete-lead-btn').style.display = lead && isManagerOrAdmin() ? 'flex' : 'none';
+
             leadModal.classList.add('active');
+        }
+
+        function setFormReadOnly(readOnly) {
+            const fields = leadForm.querySelectorAll('input, select, textarea');
+            fields.forEach(field => {
+                if (field.id === 'lead-id') return;
+                field.disabled = readOnly;
+            });
+            document.getElementById('save-lead-btn').style.display = readOnly ? 'none' : 'inline-flex';
+            const commentInput = document.getElementById('new-comment');
+            const addCommentBtn = document.getElementById('add-comment-btn');
+            if (commentInput) commentInput.disabled = readOnly;
+            if (addCommentBtn) addCommentBtn.disabled = readOnly;
         }
 
         function closeLeadModal() {
             leadModal.classList.remove('active');
             editingLeadId = null;
             leadForm.reset();
+            setFormReadOnly(false);
         }
 
         function renderActivities(activities) {
             const list = document.getElementById('activity-list');
             const sortedActivities = [...activities].sort((a, b) => 
-                new Date(b.timestamp) - new Date(a.timestamp)
+                getTimestampValue(b.timestamp) - getTimestampValue(a.timestamp)
             );
 
             list.innerHTML = sortedActivities.map(activity => `
@@ -2369,20 +2671,20 @@
                     <div class="activity-avatar">
                         ${activity.userPhoto 
                             ? `<img src="${activity.userPhoto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
-                            : getInitials(activity.userName)
+                            : escapeHTML(getInitials(activity.userName))
                         }
                     </div>
                     <div class="activity-content">
                         <div class="activity-header">
-                            <span class="activity-author">${activity.userName || 'Unknown'}</span>
+                            <span class="activity-author">${escapeHTML(activity.userName || 'Unknown')}</span>
                             <span class="activity-time">${getTimeAgo(activity.timestamp)}</span>
                         </div>
                         <div class="activity-text">
                             <span class="activity-badge">
                                 <i class="fas fa-${activity.type === 'comment' ? 'comment' : activity.type === 'status' ? 'exchange-alt' : 'plus'}"></i>
-                                ${activity.type}
+                                ${escapeHTML(activity.type)}
                             </span>
-                            ${activity.text}
+                            ${escapeHTML(activity.text)}
                         </div>
                     </div>
                 </div>
@@ -2415,6 +2717,8 @@
                 priority: document.getElementById('lead-priority').value,
                 value: parseInt(document.getElementById('lead-value').value) || 0,
                 assignee: document.getElementById('lead-assignee').value,
+                leadPurpose: document.getElementById('lead-purpose').value.trim(),
+                firstFollowup: document.getElementById('lead-first-followup').value || null,
                 notes: document.getElementById('lead-notes').value.trim(),
                 tags: Array.from(document.querySelectorAll('.tag-option input:checked')).map(cb => cb.value),
                 activities: editingLeadId 
@@ -2425,7 +2729,7 @@
                         userId: currentUser.uid,
                         userName: currentUser.displayName,
                         userPhoto: currentUser.photoURL,
-                        timestamp: new Date().toISOString()
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     }]
             };
 
@@ -2479,6 +2783,18 @@
         document.getElementById('filter-status').addEventListener('change', renderView);
         document.getElementById('filter-assignee').addEventListener('change', renderView);
         document.getElementById('filter-priority').addEventListener('change', renderView);
+
+        // Bulk actions
+        document.getElementById('select-all').addEventListener('change', (e) => {
+            if (e.target.checked) {
+                lastRenderedLeadIds.forEach(id => selectedLeadIds.add(id));
+            } else {
+                lastRenderedLeadIds.forEach(id => selectedLeadIds.delete(id));
+            }
+            renderListView();
+        });
+
+        document.getElementById('bulk-apply-btn').addEventListener('click', applyBulkStatus);
 
         // Analytics toggle
         document.getElementById('toggle-analytics').addEventListener('click', () => {
@@ -2560,12 +2876,12 @@
             const list = document.getElementById('team-list');
             list.innerHTML = teamMembers.map(member => `
                 <div class="team-member">
-                    <img class="team-member-avatar" src="${member.photoURL || ''}" alt="${member.name}">
+                    <img class="team-member-avatar" src="${member.photoURL || ''}" alt="${escapeHTML(member.name)}">
                     <div class="team-member-info">
-                        <div class="team-member-name">${member.name}</div>
-                        <div class="team-member-email">${member.email}</div>
+                        <div class="team-member-name">${escapeHTML(member.name)}</div>
+                        <div class="team-member-email">${escapeHTML(member.email)}</div>
                     </div>
-                    <span class="team-member-role">${member.role || 'Member'}</span>
+                    <span class="team-member-role">${escapeHTML(member.role || 'Member')}</span>
                 </div>
             `).join('');
         }
