@@ -1293,6 +1293,61 @@
             border-radius: 4px;
         }
 
+        .team-manage {
+            padding: 1rem;
+            border: 1px dashed rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            background: var(--snow);
+        }
+
+        .team-manage.hidden { display: none; }
+
+        .team-form {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .team-form input,
+        .team-form select {
+            padding: 0.5rem 0.6rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .team-form .btn {
+            grid-column: span 3;
+            justify-self: start;
+        }
+
+        .team-note {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .team-member-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .role-select {
+            padding: 0.3rem 0.4rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            background: var(--white);
+        }
+
+        .btn-small {
+            padding: 0.35rem 0.5rem;
+            font-size: 0.7rem;
+        }
+
         /* Toast */
         .toast-container {
             position: fixed;
@@ -1771,6 +1826,22 @@
                 <button class="modal-close" id="team-modal-close"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
+                <div class="team-manage hidden" id="team-manage">
+                    <h3 class="modal-section-title">Manage Team</h3>
+                    <div class="team-form">
+                        <input type="text" id="team-name" placeholder="Full name">
+                        <input type="email" id="team-email" placeholder="Email address">
+                        <select id="team-role">
+                            <option value="member">Member</option>
+                            <option value="manager">Manager</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <button type="button" class="btn btn-primary" id="add-team-btn">
+                            <i class="fas fa-user-plus"></i> Add Member
+                        </button>
+                    </div>
+                    <div class="team-note">Added members appear in assignee lists. Actual access still depends on Firebase Auth.</div>
+                </div>
                 <div class="team-list" id="team-list"></div>
             </div>
             <div class="modal-footer">
@@ -1940,6 +2011,12 @@
             bulk.classList.toggle('visible', isManagerOrAdmin());
         }
 
+        function updateTeamManagementVisibility() {
+            const manage = document.getElementById('team-manage');
+            if (!manage) return;
+            manage.classList.toggle('hidden', !isManagerOrAdmin());
+        }
+
         function debounce(func, wait) {
             let timeout;
             return function(...args) {
@@ -2035,6 +2112,7 @@
             app.classList.add('active');
             startHeartbeat();
             updateBulkActionsVisibility();
+            updateTeamManagementVisibility();
 
             // Update user info in sidebar
             document.getElementById('user-avatar').src = currentUser.photoURL || '';
@@ -2073,6 +2151,7 @@
                     if (self?.role && self.role !== currentUserRole) {
                         currentUserRole = self.role;
                         updateBulkActionsVisibility();
+                        updateTeamManagementVisibility();
                     }
                     updateAssigneeDropdowns();
                     updateOnlineUsers();
@@ -2828,16 +2907,18 @@
             });
         });
 
-        // Tag selection
-        document.querySelectorAll('.tag-option').forEach(option => {
-            option.addEventListener('click', function(e) {
-                if (e.target.tagName !== 'INPUT') {
-                    const checkbox = this.querySelector('input');
-                    checkbox.checked = !checkbox.checked;
-                }
-                this.classList.toggle('selected', this.querySelector('input').checked);
+        // Tag selection (prevent double toggle)
+        const tagSelector = document.getElementById('tag-selector');
+        if (tagSelector) {
+            tagSelector.addEventListener('click', (e) => {
+                const option = e.target.closest('.tag-option');
+                if (!option) return;
+                e.preventDefault();
+                const checkbox = option.querySelector('input');
+                checkbox.checked = !checkbox.checked;
+                option.classList.toggle('selected', checkbox.checked);
             });
-        });
+        }
 
         // Export
         document.getElementById('export-nav-btn').addEventListener('click', () => {
@@ -2872,8 +2953,42 @@
             if (e.target === teamModal) teamModal.classList.remove('active');
         });
 
+        // Add team member
+        document.getElementById('add-team-btn').addEventListener('click', async () => {
+            if (!isManagerOrAdmin()) {
+                showToast('Only managers or admins can add team members', 'error');
+                return;
+            }
+            const name = document.getElementById('team-name').value.trim();
+            const email = document.getElementById('team-email').value.trim();
+            const role = document.getElementById('team-role').value;
+
+            if (!name || !email) {
+                showToast('Name and email are required', 'error');
+                return;
+            }
+
+            try {
+                await db.collection('users').add({
+                    name,
+                    email,
+                    role,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastSeen: null
+                });
+                document.getElementById('team-name').value = '';
+                document.getElementById('team-email').value = '';
+                document.getElementById('team-role').value = 'member';
+                showToast('Team member added', 'success');
+            } catch (error) {
+                console.error('Add member error:', error);
+                showToast('Failed to add member', 'error');
+            }
+        });
+
         function renderTeamList() {
             const list = document.getElementById('team-list');
+            const canManage = isManagerOrAdmin();
             list.innerHTML = teamMembers.map(member => `
                 <div class="team-member">
                     <img class="team-member-avatar" src="${member.photoURL || ''}" alt="${escapeHTML(member.name)}">
@@ -2881,9 +2996,58 @@
                         <div class="team-member-name">${escapeHTML(member.name)}</div>
                         <div class="team-member-email">${escapeHTML(member.email)}</div>
                     </div>
-                    <span class="team-member-role">${escapeHTML(member.role || 'Member')}</span>
+                    ${canManage
+                        ? `<div class="team-member-actions">
+                                <select class="role-select" data-member-id="${member.id}">
+                                    <option value="member" ${member.role === 'member' ? 'selected' : ''}>Member</option>
+                                    <option value="manager" ${member.role === 'manager' ? 'selected' : ''}>Manager</option>
+                                    <option value="admin" ${member.role === 'admin' ? 'selected' : ''}>Admin</option>
+                                </select>
+                                ${member.id !== currentUser?.uid
+                                    ? `<button type="button" class="btn btn-danger btn-small remove-member-btn" data-member-id="${member.id}">
+                                            Remove
+                                       </button>`
+                                    : ''
+                                }
+                           </div>`
+                        : `<span class="team-member-role">${escapeHTML(member.role || 'Member')}</span>`
+                    }
                 </div>
             `).join('');
+
+            if (canManage) {
+                list.querySelectorAll('.role-select').forEach(select => {
+                    select.addEventListener('change', async (e) => {
+                        const memberId = e.target.dataset.memberId;
+                        const newRole = e.target.value;
+                        try {
+                            await db.collection('users').doc(memberId).update({ role: newRole });
+                            showToast('Role updated', 'success');
+                        } catch (error) {
+                            console.error('Role update error:', error);
+                            showToast('Failed to update role', 'error');
+                        }
+                    });
+                });
+
+                list.querySelectorAll('.remove-member-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const memberId = e.target.dataset.memberId;
+                        if (memberId === currentUser?.uid) {
+                            showToast('You cannot remove yourself', 'error');
+                            return;
+                        }
+                        if (!confirm('Remove this team member?')) return;
+                        try {
+                            await db.collection('users').doc(memberId).delete();
+                            showToast('Team member removed', 'success');
+                        } catch (error) {
+                            console.error('Remove member error:', error);
+                            showToast('Failed to remove member', 'error');
+                        }
+                    });
+                });
+            }
         }
 
         // Keyboard shortcuts
