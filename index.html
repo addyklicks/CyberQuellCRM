@@ -1395,9 +1395,33 @@
 
         .empty-state p { font-size: 0.8rem; }
 
+        /* Mobile menu button (hidden on desktop) */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--racing-green);
+            cursor: pointer;
+            padding: 0.4rem 0.5rem;
+            border-radius: 6px;
+            transition: background var(--transition-fast);
+        }
+        .mobile-menu-btn:hover { background: var(--snow); }
+
+        /* Sidebar backdrop (hidden by default) */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 499;
+        }
+        .sidebar-backdrop.visible { display: block; }
+
         /* Responsive */
         @media (max-width: 1024px) {
-            .analytics-grid { grid-template-columns: repeat(3, 1fr); }
+            .analytics-grid { grid-template-columns: repeat(4, 1fr); }
         }
 
         @media (max-width: 768px) {
@@ -1409,6 +1433,65 @@
             .search-box { display: none; }
             .form-row { grid-template-columns: 1fr; }
             .login-features { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            /* Hamburger visible, sidebar becomes overlay */
+            .mobile-menu-btn { display: flex; }
+            .sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: -260px;
+                width: 260px;
+                z-index: 500;
+                transition: left 0.25s ease;
+            }
+            .sidebar.open { left: 0; }
+            /* Restore sidebar text labels inside overlay */
+            .sidebar-title, .nav-section-title, .nav-item span, .nav-badge,
+            .sidebar-user-info { display: block; }
+            .nav-item { justify-content: flex-start; padding: 0.7rem 1.25rem; }
+
+            /* Top bar wraps: hamburger + tabs on row 1, search on row 2 */
+            .top-bar { flex-wrap: wrap; padding: 0.5rem 0.75rem; gap: 0.4rem; }
+            .search-box { display: flex; width: 100%; order: 3; }
+            .top-actions { margin-left: auto; }
+            .online-users { display: none; }
+
+            /* Filter bar stacks vertically */
+            .filter-bar { flex-direction: column; align-items: flex-start; padding: 0.5rem 0.75rem; gap: 0.35rem; }
+            .lead-count { margin-left: 0; }
+
+            /* Analytics */
+            .analytics-section { padding: 0.5rem 0.75rem; }
+            .analytics-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+            .stat-value { font-size: 1.15rem; }
+
+            /* Kanban — narrower columns, touch-friendly scroll */
+            .kanban-view { padding: 0.5rem 0.75rem; -webkit-overflow-scrolling: touch; }
+            .kanban-column { width: 220px; }
+
+            /* List view — horizontal scroll */
+            .list-view { padding: 0.5rem; }
+            .leads-table { min-width: 580px; }
+
+            /* Modal — bottom sheet */
+            .modal-overlay { align-items: flex-end; }
+            .modal {
+                width: 100%;
+                max-width: 100%;
+                max-height: 90vh;
+                border-radius: 16px 16px 0 0;
+                transform: translateY(100%);
+            }
+            .modal-overlay.active .modal { transform: translateY(0); }
+
+            /* Login page */
+            .login-left { padding: 2rem 1rem; }
+            .login-card { padding: 1.5rem; }
+            .login-title { font-size: 1.8rem; }
+            .login-features { margin-top: 1.5rem; gap: 0.6rem; }
         }
 
         /* Animations */
@@ -1473,6 +1556,7 @@
 
     <!-- Main App -->
     <div class="app" id="app">
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -1540,6 +1624,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="top-bar">
+                <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="fas fa-bars"></i></button>
                 <div class="view-tabs">
                     <button class="view-tab active" data-view-type="kanban">
                         <i class="fas fa-columns"></i> Board
@@ -2034,10 +2119,18 @@
                 const provider = new firebase.auth.GoogleAuthProvider();
                 await auth.signInWithPopup(provider);
             } catch (error) {
-                console.error('Sign in error:', error);
-                showToast('Failed to sign in. Please try again.', 'error');
+                if (error.code === 'auth/popup-blocked') {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    await auth.signInWithRedirect(provider);
+                } else {
+                    console.error('Sign in error:', error);
+                    showToast('Failed to sign in. Please try again.', 'error');
+                }
             }
         });
+
+        // Silently handle any pending redirect result on page load
+        auth.getRedirectResult().catch(() => {});
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
             try {
@@ -3066,6 +3159,28 @@
                 e.preventDefault();
                 openLeadModal();
             }
+        });
+
+        // =====================================
+        // Mobile Sidebar Toggle
+        // =====================================
+        function closeMobileSidebar() {
+            document.querySelector('.sidebar').classList.remove('open');
+            document.getElementById('sidebar-backdrop').classList.remove('visible');
+        }
+
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('open');
+            document.getElementById('sidebar-backdrop').classList.toggle('visible');
+        });
+
+        document.getElementById('sidebar-backdrop').addEventListener('click', closeMobileSidebar);
+
+        // Close sidebar on nav item click (mobile)
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 480) closeMobileSidebar();
+            });
         });
     </script>
 </body>
