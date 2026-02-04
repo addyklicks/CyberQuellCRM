@@ -1,2 +1,2 @@
-# Local Firebase config (do not commit secrets)
-firebase-config.js
+node_modules/
+.DS_Store
