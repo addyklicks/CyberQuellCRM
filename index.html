@@ -1436,6 +1436,12 @@
         }
 
         @media (max-width: 480px) {
+            /* Unlock vertical page scrolling — desktop locks overflow at every level */
+            html, body { overflow: auto; }
+            .app { height: auto; min-height: 100vh; overflow: visible; }
+            .main-content { overflow: visible; }
+            .content-area { flex: none; overflow: visible; }
+
             /* Hamburger visible, sidebar becomes overlay */
             .mobile-menu-btn { display: flex; }
             .sidebar {
@@ -1468,12 +1474,14 @@
             .analytics-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
             .stat-value { font-size: 1.15rem; }
 
-            /* Kanban — narrower columns, touch-friendly scroll */
-            .kanban-view { padding: 0.5rem 0.75rem; -webkit-overflow-scrolling: touch; }
-            .kanban-column { width: 220px; }
+            /* Kanban — swipe horizontally, columns grow to fit all cards */
+            .kanban-view { flex: none; padding: 0.5rem 0.75rem; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
+            .kanban-board { height: auto; }
+            .kanban-column { width: 220px; max-height: none; height: auto; }
+            .column-content { flex: none; overflow-y: visible; }
 
-            /* List view — horizontal scroll */
-            .list-view { padding: 0.5rem; }
+            /* List view — swipe horizontally, rows visible on page scroll */
+            .list-view { flex: none; padding: 0.5rem; overflow-x: auto; overflow-y: visible; }
             .leads-table { min-width: 580px; }
 
             /* Modal — bottom sheet */
