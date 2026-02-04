@@ -2276,7 +2276,7 @@
                         userId: currentUser.uid,
                         userName: currentUser.displayName,
                         userPhoto: currentUser.photoURL,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        timestamp: new Date()
                     })
                 });
                 showToast(`Lead moved to ${newStatus}`, 'success');
@@ -2300,7 +2300,7 @@
                         userId: currentUser.uid,
                         userName: currentUser.displayName,
                         userPhoto: currentUser.photoURL,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        timestamp: new Date()
                     }),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -2565,7 +2565,7 @@
                         userId: currentUser.uid,
                         userName: currentUser.displayName,
                         userPhoto: currentUser.photoURL,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        timestamp: new Date()
                     })
                 });
             });
@@ -2808,7 +2808,7 @@
                         userId: currentUser.uid,
                         userName: currentUser.displayName,
                         userPhoto: currentUser.photoURL,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        timestamp: new Date()
                     }]
             };
 
