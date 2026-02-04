@@ -2051,15 +2051,21 @@
         });
 
         auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                currentUser = user;
-                await initializeUser(user);
-                showApp();
-                setupRealtimeListeners();
-            } else {
-                currentUser = null;
-                currentUserRole = 'member';
-                if (heartbeatInterval) clearInterval(heartbeatInterval);
+            try {
+                if (user) {
+                    currentUser = user;
+                    await initializeUser(user);
+                    showApp();
+                    setupRealtimeListeners();
+                } else {
+                    currentUser = null;
+                    currentUserRole = 'member';
+                    if (heartbeatInterval) clearInterval(heartbeatInterval);
+                    showLogin();
+                }
+            } catch (error) {
+                console.error('Auth state error:', error);
+                showToast('Something went wrong. Please try again.', 'error');
                 showLogin();
             }
         });
