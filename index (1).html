@@ -1,0 +1,2480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberQuell CRM | Lead Management</title>
+    <link rel="icon" type="image/png" href="CQ_Icon-Only_Version_Green.png">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Primary Colors */
+            --racing-green: #1E3932;
+            --watercourse: #006241;
+            --accent-green: #00754A;
+            --humming-bird: #D4E9E2;
+            
+            /* Backgrounds */
+            --white: #FFFFFF;
+            --snow: #F9F9F9;
+            --romance: #F2F0EB;
+            
+            /* Text */
+            --text-dark: #000000;
+            --text-muted: #6B7280;
+            --text-light: #9CA3AF;
+            
+            /* Status Colors */
+            --status-new: #3B82F6;
+            --status-contacted: #8B5CF6;
+            --status-qualified: #F59E0B;
+            --status-negotiation: #EC4899;
+            --status-won: #10B981;
+            --status-lost: #EF4444;
+            
+            /* Labels */
+            --label-urgent: #EF4444;
+            --label-high-value: #F59E0B;
+            --label-follow-up: #3B82F6;
+            --label-hot: #EC4899;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-normal: 250ms ease;
+            --transition-slow: 350ms ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--snow);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--romance);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--watercourse);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--racing-green);
+        }
+
+        /* App Container */
+        .app {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--racing-green);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: width var(--transition-normal);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--watercourse);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .sidebar-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sidebar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: var(--humming-bird);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 0.9rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+        }
+
+        .nav-item.active {
+            background: var(--watercourse);
+            color: var(--white);
+            border-right: 3px solid var(--accent-green);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--accent-green);
+            color: var(--white);
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: var(--white);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .view-tabs {
+            display: flex;
+            gap: 0.25rem;
+            background: var(--romance);
+            padding: 0.25rem;
+            border-radius: 8px;
+        }
+
+        .view-tab {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all var(--transition-fast);
+        }
+
+        .view-tab:hover {
+            color: var(--racing-green);
+        }
+
+        .view-tab.active {
+            background: var(--white);
+            color: var(--racing-green);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--snow);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            width: 300px;
+        }
+
+        .search-box i {
+            color: var(--text-muted);
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-light);
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-primary {
+            background: var(--watercourse);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--racing-green);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--watercourse);
+            border: 1px solid var(--watercourse);
+        }
+
+        .btn-secondary:hover {
+            background: var(--humming-bird);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-ghost:hover {
+            background: var(--snow);
+            color: var(--racing-green);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--watercourse);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: var(--white);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .filter-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: var(--white);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .filter-select:focus {
+            border-color: var(--watercourse);
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.3rem 0.6rem;
+            background: var(--humming-bird);
+            color: var(--racing-green);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .filter-tag button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--racing-green);
+            padding: 0;
+            line-height: 1;
+        }
+
+        .lead-count {
+            margin-left: auto;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .lead-count strong {
+            color: var(--racing-green);
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Analytics Dashboard */
+        .analytics-section {
+            padding: 1rem 1.5rem;
+            background: var(--white);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: none;
+        }
+
+        .analytics-section.visible {
+            display: block;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--snow);
+            border-radius: 10px;
+            padding: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .stat-card.new::before { background: var(--status-new); }
+        .stat-card.contacted::before { background: var(--status-contacted); }
+        .stat-card.qualified::before { background: var(--status-qualified); }
+        .stat-card.negotiation::before { background: var(--status-negotiation); }
+        .stat-card.won::before { background: var(--status-won); }
+        .stat-card.lost::before { background: var(--status-lost); }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--racing-green);
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--status-won);
+        }
+
+        .stat-change.negative {
+            color: var(--status-lost);
+        }
+
+        /* Kanban Board */
+        .kanban-view {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 1rem 1.5rem;
+        }
+
+        .kanban-board {
+            display: flex;
+            gap: 1rem;
+            height: 100%;
+            min-width: max-content;
+        }
+
+        .kanban-column {
+            width: 300px;
+            background: var(--romance);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 320px);
+        }
+
+        .column-header {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid transparent;
+        }
+
+        .column-header.new { border-color: var(--status-new); }
+        .column-header.contacted { border-color: var(--status-contacted); }
+        .column-header.qualified { border-color: var(--status-qualified); }
+        .column-header.negotiation { border-color: var(--status-negotiation); }
+        .column-header.won { border-color: var(--status-won); }
+        .column-header.lost { border-color: var(--status-lost); }
+
+        .column-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--racing-green);
+        }
+
+        .column-count {
+            background: var(--white);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .column-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .column-action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .column-action-btn:hover {
+            background: var(--white);
+            color: var(--racing-green);
+        }
+
+        .column-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .column-content.drag-over {
+            background: rgba(0, 98, 65, 0.1);
+        }
+
+        /* Lead Cards */
+        .lead-card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 0.75rem;
+            cursor: grab;
+            transition: all var(--transition-fast);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .lead-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .lead-card.dragging {
+            opacity: 0.5;
+            transform: rotate(3deg);
+        }
+
+        .lead-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-id {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .lead-priority {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .lead-priority.high { background: var(--label-urgent); }
+        .lead-priority.medium { background: var(--label-high-value); }
+        .lead-priority.low { background: var(--status-won); }
+
+        .lead-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--racing-green);
+            margin-bottom: 0.25rem;
+            line-height: 1.3;
+        }
+
+        .lead-company {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-tag {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .lead-tag.urgent {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--label-urgent);
+        }
+
+        .lead-tag.high-value {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--label-high-value);
+        }
+
+        .lead-tag.follow-up {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--label-follow-up);
+        }
+
+        .lead-tag.hot {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--label-hot);
+        }
+
+        .lead-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .lead-assignee {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--humming-bird);
+            color: var(--racing-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .lead-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.7rem;
+            color: var(--text-light);
+        }
+
+        .lead-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .lead-value {
+            font-weight: 600;
+            color: var(--watercourse);
+        }
+
+        /* List View */
+        .list-view {
+            flex: 1;
+            overflow: auto;
+            padding: 1rem 1.5rem;
+            display: none;
+        }
+
+        .list-view.active {
+            display: block;
+        }
+
+        .leads-table {
+            width: 100%;
+            background: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            border-collapse: collapse;
+        }
+
+        .leads-table th,
+        .leads-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .leads-table th {
+            background: var(--snow);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .leads-table th:hover {
+            background: var(--romance);
+        }
+
+        .leads-table th i {
+            margin-left: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .leads-table tbody tr {
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .leads-table tbody tr:hover {
+            background: var(--snow);
+        }
+
+        .table-lead-name {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .table-lead-name .lead-priority {
+            flex-shrink: 0;
+        }
+
+        .table-lead-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-lead-title {
+            font-weight: 500;
+            color: var(--racing-green);
+        }
+
+        .table-lead-company {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .table-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .table-status.new {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--status-new);
+        }
+
+        .table-status.contacted {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--status-contacted);
+        }
+
+        .table-status.qualified {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--status-qualified);
+        }
+
+        .table-status.negotiation {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--status-negotiation);
+        }
+
+        .table-status.won {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--status-won);
+        }
+
+        .table-status.lost {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--status-lost);
+        }
+
+        .table-tags {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .table-value {
+            font-weight: 600;
+            color: var(--watercourse);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.9) translateY(20px);
+            transition: transform var(--transition-normal);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--racing-green);
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--snow);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background: var(--romance);
+            color: var(--racing-green);
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .modal-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--racing-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color var(--transition-fast);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--watercourse);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .tag-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag-option {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.4rem 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all var(--transition-fast);
+        }
+
+        .tag-option:hover {
+            border-color: var(--watercourse);
+        }
+
+        .tag-option.selected {
+            background: var(--humming-bird);
+            border-color: var(--watercourse);
+            color: var(--racing-green);
+        }
+
+        .tag-option input {
+            display: none;
+        }
+
+        /* Activity/Comments Section */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .activity-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--humming-bird);
+            color: var(--racing-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-author {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--racing-green);
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .activity-text {
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .activity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--snow);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .comment-input {
+            display: flex;
+            gap: 0.75rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .comment-input textarea {
+            flex: 1;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            resize: none;
+            min-height: 60px;
+            outline: none;
+        }
+
+        .comment-input textarea:focus {
+            border-color: var(--watercourse);
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-footer-left {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .modal-footer-right {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--label-urgent);
+            border: 1px solid var(--label-urgent);
+        }
+
+        .btn-danger:hover {
+            background: var(--label-urgent);
+            color: var(--white);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 1100;
+        }
+
+        .toast {
+            background: var(--racing-green);
+            color: var(--white);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(120%);
+            transition: transform var(--transition-normal);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: var(--status-won);
+        }
+
+        .toast.error {
+            background: var(--label-urgent);
+        }
+
+        .toast i {
+            font-size: 1rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .analytics-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .sidebar-title,
+            .nav-section-title,
+            .nav-item span,
+            .nav-badge {
+                display: none;
+            }
+
+            .nav-item {
+                justify-content: center;
+                padding: 0.75rem;
+            }
+
+            .nav-item i {
+                width: auto;
+            }
+
+            .analytics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .search-box {
+                display: none;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .kanban-view .lead-card {
+            animation: slideUp 0.3s ease forwards;
+        }
+
+        .kanban-column:nth-child(1) .lead-card { animation-delay: 0.05s; }
+        .kanban-column:nth-child(2) .lead-card { animation-delay: 0.1s; }
+        .kanban-column:nth-child(3) .lead-card { animation-delay: 0.15s; }
+        .kanban-column:nth-child(4) .lead-card { animation-delay: 0.2s; }
+        .kanban-column:nth-child(5) .lead-card { animation-delay: 0.25s; }
+        .kanban-column:nth-child(6) .lead-card { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="CQ_Icon-Only_Version_Green.png" alt="CyberQuell Logo">
+                </div>
+                <span class="sidebar-title">CyberQuell</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a class="nav-item active" data-view="leads">
+                        <i class="fas fa-users"></i>
+                        <span>Leads</span>
+                        <span class="nav-badge" id="total-leads-badge">0</span>
+                    </a>
+                    <a class="nav-item" data-view="analytics">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Quick Filters</div>
+                    <a class="nav-item" data-filter="my-leads">
+                        <i class="fas fa-user-check"></i>
+                        <span>My Leads</span>
+                    </a>
+                    <a class="nav-item" data-filter="urgent">
+                        <i class="fas fa-fire"></i>
+                        <span>Urgent</span>
+                    </a>
+                    <a class="nav-item" data-filter="high-value">
+                        <i class="fas fa-gem"></i>
+                        <span>High Value</span>
+                    </a>
+                    <a class="nav-item" data-filter="follow-up">
+                        <i class="fas fa-clock"></i>
+                        <span>Follow Up</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Settings</div>
+                    <a class="nav-item" data-action="manage-team">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Team</span>
+                    </a>
+                    <a class="nav-item" data-action="export">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </a>
+                    <a class="nav-item" data-action="import">
+                        <i class="fas fa-upload"></i>
+                        <span>Import</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="view-tabs">
+                    <button class="view-tab active" data-view-type="kanban">
+                        <i class="fas fa-columns"></i>
+                        Board
+                    </button>
+                    <button class="view-tab" data-view-type="list">
+                        <i class="fas fa-list"></i>
+                        List
+                    </button>
+                </div>
+
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search leads...">
+                </div>
+
+                <div class="top-actions">
+                    <button class="btn btn-ghost" id="toggle-analytics" title="Toggle Analytics">
+                        <i class="fas fa-chart-pie"></i>
+                    </button>
+                    <button class="btn btn-primary" id="add-lead-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Lead
+                    </button>
+                    <div class="user-avatar" title="John Doe">JD</div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <span class="filter-label">Status:</span>
+                    <select class="filter-select" id="filter-status">
+                        <option value="">All Stages</option>
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="qualified">Qualified</option>
+                        <option value="negotiation">Negotiation</option>
+                        <option value="won">Won</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Assignee:</span>
+                    <select class="filter-select" id="filter-assignee">
+                        <option value="">All Team</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Priority:</span>
+                    <select class="filter-select" id="filter-priority">
+                        <option value="">Any Priority</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <div class="filter-tags" id="active-filters"></div>
+                <div class="lead-count">
+                    Showing <strong id="visible-count">0</strong> of <strong id="total-count">0</strong> leads
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Analytics Section -->
+                <div class="analytics-section" id="analytics-section">
+                    <div class="analytics-grid">
+                        <div class="stat-card new">
+                            <div class="stat-label">New</div>
+                            <div class="stat-value" id="stat-new">0</div>
+                        </div>
+                        <div class="stat-card contacted">
+                            <div class="stat-label">Contacted</div>
+                            <div class="stat-value" id="stat-contacted">0</div>
+                        </div>
+                        <div class="stat-card qualified">
+                            <div class="stat-label">Qualified</div>
+                            <div class="stat-value" id="stat-qualified">0</div>
+                        </div>
+                        <div class="stat-card negotiation">
+                            <div class="stat-label">Negotiation</div>
+                            <div class="stat-value" id="stat-negotiation">0</div>
+                        </div>
+                        <div class="stat-card won">
+                            <div class="stat-label">Won</div>
+                            <div class="stat-value" id="stat-won">0</div>
+                        </div>
+                        <div class="stat-card lost">
+                            <div class="stat-label">Lost</div>
+                            <div class="stat-value" id="stat-lost">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kanban View -->
+                <div class="kanban-view" id="kanban-view">
+                    <div class="kanban-board" id="kanban-board">
+                        <!-- Columns will be generated by JS -->
+                    </div>
+                </div>
+
+                <!-- List View -->
+                <div class="list-view" id="list-view">
+                    <table class="leads-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="name">Lead <i class="fas fa-sort"></i></th>
+                                <th data-sort="status">Status <i class="fas fa-sort"></i></th>
+                                <th data-sort="value">Value <i class="fas fa-sort"></i></th>
+                                <th data-sort="tags">Tags</th>
+                                <th data-sort="assignee">Assignee <i class="fas fa-sort"></i></th>
+                                <th data-sort="created">Created <i class="fas fa-sort"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="leads-table-body">
+                            <!-- Rows generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Lead Modal -->
+    <div class="modal-overlay" id="lead-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Add New Lead</h2>
+                <button class="modal-close" id="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="lead-form">
+                    <input type="hidden" id="lead-id">
+                    
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">Basic Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lead-name">Lead Name *</label>
+                                <input type="text" id="lead-name" required placeholder="e.g., Enterprise Security Deal">
+                            </div>
+                            <div class="form-group">
+                                <label for="lead-company">Company</label>
+                                <input type="text" id="lead-company" placeholder="e.g., Acme Corporation">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lead-email">Email</label>
+                                <input type="email" id="lead-email" placeholder="e.g., contact@acme.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="lead-phone">Phone</label>
+                                <input type="tel" id="lead-phone" placeholder="e.g., +1 (555) 123-4567">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">Lead Details</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lead-status">Status</label>
+                                <select id="lead-status">
+                                    <option value="new">New</option>
+                                    <option value="contacted">Contacted</option>
+                                    <option value="qualified">Qualified</option>
+                                    <option value="negotiation">Negotiation</option>
+                                    <option value="won">Won</option>
+                                    <option value="lost">Lost</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="lead-priority">Priority</label>
+                                <select id="lead-priority">
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lead-value">Estimated Value ($)</label>
+                                <input type="number" id="lead-value" placeholder="e.g., 50000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="lead-assignee">Assignee</label>
+                                <select id="lead-assignee">
+                                    <!-- Options populated by JS -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">Tags</h3>
+                        <div class="tag-selector" id="tag-selector">
+                            <label class="tag-option" data-tag="urgent">
+                                <input type="checkbox" name="tags" value="urgent">
+                                <i class="fas fa-fire"></i> Urgent
+                            </label>
+                            <label class="tag-option" data-tag="high-value">
+                                <input type="checkbox" name="tags" value="high-value">
+                                <i class="fas fa-gem"></i> High Value
+                            </label>
+                            <label class="tag-option" data-tag="follow-up">
+                                <input type="checkbox" name="tags" value="follow-up">
+                                <i class="fas fa-clock"></i> Follow Up
+                            </label>
+                            <label class="tag-option" data-tag="hot">
+                                <input type="checkbox" name="tags" value="hot">
+                                <i class="fas fa-star"></i> Hot
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">Notes</h3>
+                        <div class="form-group">
+                            <textarea id="lead-notes" placeholder="Add any additional notes about this lead..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-section" id="activity-section" style="display: none;">
+                        <h3 class="modal-section-title">Activity & Comments</h3>
+                        <div class="activity-list" id="activity-list">
+                            <!-- Activities populated by JS -->
+                        </div>
+                        <div class="comment-input">
+                            <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.7rem;">JD</div>
+                            <textarea id="new-comment" placeholder="Add a comment..."></textarea>
+                            <button type="button" class="btn btn-primary" id="add-comment-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-footer-left">
+                    <button type="button" class="btn btn-danger" id="delete-lead-btn" style="display: none;">
+                        <i class="fas fa-trash"></i>
+                        Delete
+                    </button>
+                </div>
+                <div class="modal-footer-right">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+                    <button type="submit" form="lead-form" class="btn btn-primary" id="save-lead-btn">
+                        <i class="fas fa-check"></i>
+                        Save Lead
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Import Modal -->
+    <input type="file" id="import-file" accept=".json" style="display: none;">
+
+    <script>
+        // =====================================
+        // CRM Dashboard Application
+        // =====================================
+
+        // Column definitions
+        const COLUMNS = [
+            { id: 'new', label: 'New', color: '#3B82F6' },
+            { id: 'contacted', label: 'Contacted', color: '#8B5CF6' },
+            { id: 'qualified', label: 'Qualified', color: '#F59E0B' },
+            { id: 'negotiation', label: 'Negotiation', color: '#EC4899' },
+            { id: 'won', label: 'Won', color: '#10B981' },
+            { id: 'lost', label: 'Lost', color: '#EF4444' }
+        ];
+
+        // Team members
+        const TEAM_MEMBERS = [
+            { id: 'jd', name: 'John Doe', initials: 'JD' },
+            { id: 'as', name: 'Alice Smith', initials: 'AS' },
+            { id: 'bj', name: 'Bob Johnson', initials: 'BJ' },
+            { id: 'mc', name: 'Maria Chen', initials: 'MC' }
+        ];
+
+        // Storage key
+        const STORAGE_KEY = 'cyberquell_crm_leads';
+
+        // State
+        let leads = [];
+        let currentFilter = {};
+        let currentView = 'kanban';
+        let editingLeadId = null;
+        let sortColumn = 'created';
+        let sortDirection = 'desc';
+
+        // DOM Elements
+        const kanbanBoard = document.getElementById('kanban-board');
+        const listView = document.getElementById('list-view');
+        const kanbanView = document.getElementById('kanban-view');
+        const leadsTableBody = document.getElementById('leads-table-body');
+        const leadModal = document.getElementById('lead-modal');
+        const leadForm = document.getElementById('lead-form');
+        const searchInput = document.getElementById('search-input');
+        const analyticsSection = document.getElementById('analytics-section');
+
+        // =====================================
+        // Utility Functions
+        // =====================================
+
+        function generateId() {
+            return 'lead-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function formatCurrency(amount) {
+            if (!amount) return '-';
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function getTeamMember(id) {
+            return TEAM_MEMBERS.find(m => m.id === id) || TEAM_MEMBERS[0];
+        }
+
+        // =====================================
+        // Storage Functions
+        // =====================================
+
+        function saveLeads() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+        }
+
+        function loadLeads() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
+                try {
+                    leads = JSON.parse(data);
+                } catch (e) {
+                    console.error('Failed to parse leads:', e);
+                    leads = [];
+                }
+            }
+            // If no leads, add sample data
+            if (leads.length === 0) {
+                leads = getSampleLeads();
+                saveLeads();
+            }
+        }
+
+        function getSampleLeads() {
+            return [
+                {
+                    id: generateId(),
+                    name: 'Enterprise Security Package',
+                    company: 'TechCorp Solutions',
+                    email: 'cto@techcorp.com',
+                    phone: '+1 (555) 123-4567',
+                    status: 'new',
+                    priority: 'high',
+                    value: 75000,
+                    assignee: 'jd',
+                    tags: ['urgent', 'high-value'],
+                    notes: 'Large enterprise looking for comprehensive security solution.',
+                    activities: [
+                        { id: 'a1', type: 'created', user: 'jd', text: 'Lead created', timestamp: Date.now() - 86400000 }
+                    ],
+                    created: Date.now() - 86400000
+                },
+                {
+                    id: generateId(),
+                    name: 'MXDR Implementation',
+                    company: 'FinanceFirst Bank',
+                    email: 'security@financefirst.com',
+                    phone: '+1 (555) 234-5678',
+                    status: 'contacted',
+                    priority: 'high',
+                    value: 120000,
+                    assignee: 'as',
+                    tags: ['high-value', 'hot'],
+                    notes: 'Banking sector client interested in 24/7 monitoring.',
+                    activities: [
+                        { id: 'a2', type: 'created', user: 'as', text: 'Lead created', timestamp: Date.now() - 172800000 },
+                        { id: 'a3', type: 'email', user: 'as', text: 'Sent initial proposal via email', timestamp: Date.now() - 86400000 }
+                    ],
+                    created: Date.now() - 172800000
+                },
+                {
+                    id: generateId(),
+                    name: 'SOC Services Upgrade',
+                    company: 'HealthCare Plus',
+                    email: 'it@healthcareplus.org',
+                    phone: '+1 (555) 345-6789',
+                    status: 'qualified',
+                    priority: 'medium',
+                    value: 45000,
+                    assignee: 'bj',
+                    tags: ['follow-up'],
+                    notes: 'Healthcare provider upgrading from basic monitoring.',
+                    activities: [
+                        { id: 'a4', type: 'created', user: 'bj', text: 'Lead created', timestamp: Date.now() - 259200000 },
+                        { id: 'a5', type: 'call', user: 'bj', text: 'Discovery call completed', timestamp: Date.now() - 172800000 },
+                        { id: 'a6', type: 'comment', user: 'bj', text: 'Client has budget approval, moving to proposal', timestamp: Date.now() - 86400000 }
+                    ],
+                    created: Date.now() - 259200000
+                },
+                {
+                    id: generateId(),
+                    name: 'Penetration Testing Contract',
+                    company: 'StartupXYZ',
+                    email: 'founder@startupxyz.io',
+                    phone: '+1 (555) 456-7890',
+                    status: 'negotiation',
+                    priority: 'medium',
+                    value: 25000,
+                    assignee: 'mc',
+                    tags: ['hot'],
+                    notes: 'Fast-growing startup needs security assessment before Series B.',
+                    activities: [
+                        { id: 'a7', type: 'created', user: 'mc', text: 'Lead created', timestamp: Date.now() - 345600000 },
+                        { id: 'a8', type: 'meeting', user: 'mc', text: 'Demo meeting held', timestamp: Date.now() - 172800000 },
+                        { id: 'a9', type: 'comment', user: 'mc', text: 'Negotiating scope and timeline', timestamp: Date.now() - 43200000 }
+                    ],
+                    created: Date.now() - 345600000
+                },
+                {
+                    id: generateId(),
+                    name: 'Annual Security Retainer',
+                    company: 'ManufactureCo',
+                    email: 'ops@manufactureco.com',
+                    phone: '+1 (555) 567-8901',
+                    status: 'won',
+                    priority: 'low',
+                    value: 60000,
+                    assignee: 'jd',
+                    tags: ['high-value'],
+                    notes: 'Manufacturing company signed annual contract.',
+                    activities: [
+                        { id: 'a10', type: 'created', user: 'jd', text: 'Lead created', timestamp: Date.now() - 604800000 },
+                        { id: 'a11', type: 'status', user: 'jd', text: 'Contract signed! 🎉', timestamp: Date.now() - 86400000 }
+                    ],
+                    created: Date.now() - 604800000
+                },
+                {
+                    id: generateId(),
+                    name: 'Compliance Assessment',
+                    company: 'LegalEagles LLP',
+                    email: 'partner@legaleagles.com',
+                    phone: '+1 (555) 678-9012',
+                    status: 'lost',
+                    priority: 'low',
+                    value: 30000,
+                    assignee: 'as',
+                    tags: [],
+                    notes: 'Lost to competitor due to pricing.',
+                    activities: [
+                        { id: 'a12', type: 'created', user: 'as', text: 'Lead created', timestamp: Date.now() - 432000000 },
+                        { id: 'a13', type: 'status', user: 'as', text: 'Closed - lost to competitor', timestamp: Date.now() - 172800000 }
+                    ],
+                    created: Date.now() - 432000000
+                }
+            ];
+        }
+
+        // =====================================
+        // Filter Functions
+        // =====================================
+
+        function getFilteredLeads() {
+            let filtered = [...leads];
+
+            // Search filter
+            if (searchInput.value.trim()) {
+                const search = searchInput.value.toLowerCase();
+                filtered = filtered.filter(lead =>
+                    lead.name.toLowerCase().includes(search) ||
+                    (lead.company && lead.company.toLowerCase().includes(search)) ||
+                    (lead.email && lead.email.toLowerCase().includes(search))
+                );
+            }
+
+            // Status filter
+            const statusFilter = document.getElementById('filter-status').value;
+            if (statusFilter) {
+                filtered = filtered.filter(lead => lead.status === statusFilter);
+            }
+
+            // Assignee filter
+            const assigneeFilter = document.getElementById('filter-assignee').value;
+            if (assigneeFilter) {
+                filtered = filtered.filter(lead => lead.assignee === assigneeFilter);
+            }
+
+            // Priority filter
+            const priorityFilter = document.getElementById('filter-priority').value;
+            if (priorityFilter) {
+                filtered = filtered.filter(lead => lead.priority === priorityFilter);
+            }
+
+            // Quick filters
+            if (currentFilter.tag) {
+                filtered = filtered.filter(lead => lead.tags && lead.tags.includes(currentFilter.tag));
+            }
+
+            if (currentFilter.myLeads) {
+                filtered = filtered.filter(lead => lead.assignee === 'jd');
+            }
+
+            return filtered;
+        }
+
+        // =====================================
+        // Render Functions
+        // =====================================
+
+        function renderKanbanBoard() {
+            kanbanBoard.innerHTML = '';
+            const filteredLeads = getFilteredLeads();
+
+            COLUMNS.forEach(column => {
+                const columnLeads = filteredLeads.filter(lead => lead.status === column.id);
+
+                const columnEl = document.createElement('div');
+                columnEl.className = 'kanban-column';
+                columnEl.dataset.columnId = column.id;
+
+                columnEl.innerHTML = `
+                    <div class="column-header ${column.id}">
+                        <div class="column-title">
+                            ${column.label}
+                            <span class="column-count">${columnLeads.length}</span>
+                        </div>
+                        <div class="column-actions">
+                            <button class="column-action-btn" onclick="addLeadToColumn('${column.id}')" title="Add lead">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="column-content" data-column="${column.id}">
+                        ${columnLeads.length === 0 ? `
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>No leads</p>
+                            </div>
+                        ` : columnLeads.map(lead => renderLeadCard(lead)).join('')}
+                    </div>
+                `;
+
+                kanbanBoard.appendChild(columnEl);
+            });
+
+            // Setup drag and drop
+            setupDragAndDrop();
+            updateCounts(filteredLeads);
+        }
+
+        function renderLeadCard(lead) {
+            const assignee = getTeamMember(lead.assignee);
+            const tagsHtml = lead.tags && lead.tags.length > 0
+                ? lead.tags.map(tag => `<span class="lead-tag ${tag}">${tag.replace('-', ' ')}</span>`).join('')
+                : '';
+
+            return `
+                <div class="lead-card" draggable="true" data-lead-id="${lead.id}">
+                    <div class="lead-card-header">
+                        <span class="lead-id">#${lead.id.slice(-6).toUpperCase()}</span>
+                        <span class="lead-priority ${lead.priority}" title="${lead.priority} priority"></span>
+                    </div>
+                    <div class="lead-title">${lead.name}</div>
+                    ${lead.company ? `<div class="lead-company">${lead.company}</div>` : ''}
+                    ${tagsHtml ? `<div class="lead-tags">${tagsHtml}</div>` : ''}
+                    <div class="lead-footer">
+                        <div class="lead-assignee" title="${assignee.name}">${assignee.initials}</div>
+                        <div class="lead-meta">
+                            ${lead.value ? `<span class="lead-value">${formatCurrency(lead.value)}</span>` : ''}
+                            <span><i class="fas fa-comment"></i> ${lead.activities ? lead.activities.length : 0}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderListView() {
+            const filteredLeads = getFilteredLeads();
+
+            // Sort leads
+            filteredLeads.sort((a, b) => {
+                let aVal, bVal;
+                switch (sortColumn) {
+                    case 'name':
+                        aVal = a.name.toLowerCase();
+                        bVal = b.name.toLowerCase();
+                        break;
+                    case 'status':
+                        aVal = COLUMNS.findIndex(c => c.id === a.status);
+                        bVal = COLUMNS.findIndex(c => c.id === b.status);
+                        break;
+                    case 'value':
+                        aVal = a.value || 0;
+                        bVal = b.value || 0;
+                        break;
+                    case 'assignee':
+                        aVal = getTeamMember(a.assignee).name;
+                        bVal = getTeamMember(b.assignee).name;
+                        break;
+                    case 'created':
+                    default:
+                        aVal = a.created;
+                        bVal = b.created;
+                }
+                if (sortDirection === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                }
+                return aVal < bVal ? 1 : -1;
+            });
+
+            leadsTableBody.innerHTML = filteredLeads.map(lead => {
+                const assignee = getTeamMember(lead.assignee);
+                const tagsHtml = lead.tags && lead.tags.length > 0
+                    ? lead.tags.map(tag => `<span class="lead-tag ${tag}">${tag.replace('-', ' ')}</span>`).join('')
+                    : '-';
+
+                return `
+                    <tr data-lead-id="${lead.id}">
+                        <td>
+                            <div class="table-lead-name">
+                                <span class="lead-priority ${lead.priority}"></span>
+                                <div class="table-lead-info">
+                                    <span class="table-lead-title">${lead.name}</span>
+                                    <span class="table-lead-company">${lead.company || '-'}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="table-status ${lead.status}">${lead.status}</span></td>
+                        <td class="table-value">${formatCurrency(lead.value)}</td>
+                        <td><div class="table-tags">${tagsHtml}</div></td>
+                        <td>
+                            <div class="lead-assignee" title="${assignee.name}">${assignee.initials}</div>
+                        </td>
+                        <td>${formatDate(lead.created)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Add click handlers
+            leadsTableBody.querySelectorAll('tr').forEach(row => {
+                row.addEventListener('click', () => openLeadModal(row.dataset.leadId));
+            });
+
+            updateCounts(filteredLeads);
+        }
+
+        function updateCounts(filteredLeads) {
+            document.getElementById('visible-count').textContent = filteredLeads.length;
+            document.getElementById('total-count').textContent = leads.length;
+            document.getElementById('total-leads-badge').textContent = leads.length;
+
+            // Update analytics
+            COLUMNS.forEach(column => {
+                const count = leads.filter(l => l.status === column.id).length;
+                const statEl = document.getElementById(`stat-${column.id}`);
+                if (statEl) statEl.textContent = count;
+            });
+        }
+
+        function renderView() {
+            if (currentView === 'kanban') {
+                kanbanView.style.display = 'block';
+                listView.classList.remove('active');
+                renderKanbanBoard();
+            } else {
+                kanbanView.style.display = 'none';
+                listView.classList.add('active');
+                renderListView();
+            }
+        }
+
+        // =====================================
+        // Drag and Drop
+        // =====================================
+
+        function setupDragAndDrop() {
+            const cards = document.querySelectorAll('.lead-card');
+            const columns = document.querySelectorAll('.column-content');
+
+            cards.forEach(card => {
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+                card.addEventListener('click', () => openLeadModal(card.dataset.leadId));
+            });
+
+            columns.forEach(column => {
+                column.addEventListener('dragover', handleDragOver);
+                column.addEventListener('dragenter', handleDragEnter);
+                column.addEventListener('dragleave', handleDragLeave);
+                column.addEventListener('drop', handleDrop);
+            });
+        }
+
+        let draggedCard = null;
+
+        function handleDragStart(e) {
+            draggedCard = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.column-content').forEach(col => {
+                col.classList.remove('drag-over');
+            });
+            draggedCard = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+
+            if (draggedCard) {
+                const leadId = draggedCard.dataset.leadId;
+                const newStatus = this.dataset.column;
+                const lead = leads.find(l => l.id === leadId);
+
+                if (lead && lead.status !== newStatus) {
+                    const oldStatus = lead.status;
+                    lead.status = newStatus;
+
+                    // Add activity
+                    lead.activities = lead.activities || [];
+                    lead.activities.push({
+                        id: generateId(),
+                        type: 'status',
+                        user: 'jd',
+                        text: `Moved from ${oldStatus} to ${newStatus}`,
+                        timestamp: Date.now()
+                    });
+
+                    saveLeads();
+                    renderView();
+                    showToast(`Lead moved to ${newStatus}`, 'success');
+                }
+            }
+        }
+
+        // =====================================
+        // Modal Functions
+        // =====================================
+
+        function openLeadModal(leadId = null) {
+            editingLeadId = leadId;
+            const lead = leadId ? leads.find(l => l.id === leadId) : null;
+
+            // Update modal title
+            document.getElementById('modal-title').textContent = lead ? 'Edit Lead' : 'Add New Lead';
+
+            // Show/hide delete button
+            document.getElementById('delete-lead-btn').style.display = lead ? 'flex' : 'none';
+
+            // Show/hide activity section
+            document.getElementById('activity-section').style.display = lead ? 'block' : 'none';
+
+            // Populate form
+            document.getElementById('lead-id').value = lead?.id || '';
+            document.getElementById('lead-name').value = lead?.name || '';
+            document.getElementById('lead-company').value = lead?.company || '';
+            document.getElementById('lead-email').value = lead?.email || '';
+            document.getElementById('lead-phone').value = lead?.phone || '';
+            document.getElementById('lead-status').value = lead?.status || 'new';
+            document.getElementById('lead-priority').value = lead?.priority || 'medium';
+            document.getElementById('lead-value').value = lead?.value || '';
+            document.getElementById('lead-assignee').value = lead?.assignee || 'jd';
+            document.getElementById('lead-notes').value = lead?.notes || '';
+
+            // Populate tags
+            document.querySelectorAll('.tag-option').forEach(option => {
+                const checkbox = option.querySelector('input');
+                const isSelected = lead?.tags?.includes(checkbox.value);
+                checkbox.checked = isSelected;
+                option.classList.toggle('selected', isSelected);
+            });
+
+            // Render activities
+            if (lead && lead.activities) {
+                renderActivities(lead.activities);
+            }
+
+            // Show modal
+            leadModal.classList.add('active');
+        }
+
+        function closeLeadModal() {
+            leadModal.classList.remove('active');
+            editingLeadId = null;
+            leadForm.reset();
+        }
+
+        function renderActivities(activities) {
+            const activityList = document.getElementById('activity-list');
+            activityList.innerHTML = activities
+                .sort((a, b) => b.timestamp - a.timestamp)
+                .map(activity => {
+                    const user = getTeamMember(activity.user);
+                    const timeAgo = getTimeAgo(activity.timestamp);
+                    const icon = getActivityIcon(activity.type);
+
+                    return `
+                        <div class="activity-item">
+                            <div class="activity-avatar">${user.initials}</div>
+                            <div class="activity-content">
+                                <div class="activity-header">
+                                    <span class="activity-author">${user.name}</span>
+                                    <span class="activity-time">${timeAgo}</span>
+                                </div>
+                                <div class="activity-text">
+                                    <span class="activity-badge"><i class="${icon}"></i> ${activity.type}</span>
+                                    ${activity.text}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function getActivityIcon(type) {
+            const icons = {
+                created: 'fas fa-plus',
+                email: 'fas fa-envelope',
+                call: 'fas fa-phone',
+                meeting: 'fas fa-calendar',
+                comment: 'fas fa-comment',
+                status: 'fas fa-exchange-alt'
+            };
+            return icons[type] || 'fas fa-circle';
+        }
+
+        function getTimeAgo(timestamp) {
+            const seconds = Math.floor((Date.now() - timestamp) / 1000);
+            const intervals = [
+                { label: 'year', seconds: 31536000 },
+                { label: 'month', seconds: 2592000 },
+                { label: 'week', seconds: 604800 },
+                { label: 'day', seconds: 86400 },
+                { label: 'hour', seconds: 3600 },
+                { label: 'minute', seconds: 60 }
+            ];
+
+            for (const interval of intervals) {
+                const count = Math.floor(seconds / interval.seconds);
+                if (count >= 1) {
+                    return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
+                }
+            }
+            return 'Just now';
+        }
+
+        function addLeadToColumn(status) {
+            openLeadModal();
+            document.getElementById('lead-status').value = status;
+        }
+
+        // =====================================
+        // Form Handlers
+        // =====================================
+
+        leadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const leadData = {
+                id: editingLeadId || generateId(),
+                name: document.getElementById('lead-name').value.trim(),
+                company: document.getElementById('lead-company').value.trim(),
+                email: document.getElementById('lead-email').value.trim(),
+                phone: document.getElementById('lead-phone').value.trim(),
+                status: document.getElementById('lead-status').value,
+                priority: document.getElementById('lead-priority').value,
+                value: parseInt(document.getElementById('lead-value').value) || 0,
+                assignee: document.getElementById('lead-assignee').value,
+                notes: document.getElementById('lead-notes').value.trim(),
+                tags: Array.from(document.querySelectorAll('.tag-option input:checked')).map(cb => cb.value),
+                created: editingLeadId ? leads.find(l => l.id === editingLeadId)?.created : Date.now(),
+                activities: editingLeadId ? leads.find(l => l.id === editingLeadId)?.activities || [] : [
+                    { id: generateId(), type: 'created', user: 'jd', text: 'Lead created', timestamp: Date.now() }
+                ]
+            };
+
+            if (editingLeadId) {
+                const index = leads.findIndex(l => l.id === editingLeadId);
+                if (index !== -1) {
+                    leads[index] = leadData;
+                }
+                showToast('Lead updated successfully', 'success');
+            } else {
+                leads.push(leadData);
+                showToast('Lead created successfully', 'success');
+            }
+
+            saveLeads();
+            renderView();
+            closeLeadModal();
+        });
+
+        document.getElementById('delete-lead-btn').addEventListener('click', function() {
+            if (editingLeadId && confirm('Are you sure you want to delete this lead?')) {
+                leads = leads.filter(l => l.id !== editingLeadId);
+                saveLeads();
+                renderView();
+                closeLeadModal();
+                showToast('Lead deleted', 'success');
+            }
+        });
+
+        document.getElementById('add-comment-btn').addEventListener('click', function() {
+            const commentText = document.getElementById('new-comment').value.trim();
+            if (commentText && editingLeadId) {
+                const lead = leads.find(l => l.id === editingLeadId);
+                if (lead) {
+                    lead.activities = lead.activities || [];
+                    lead.activities.push({
+                        id: generateId(),
+                        type: 'comment',
+                        user: 'jd',
+                        text: commentText,
+                        timestamp: Date.now()
+                    });
+                    saveLeads();
+                    renderActivities(lead.activities);
+                    document.getElementById('new-comment').value = '';
+                    showToast('Comment added', 'success');
+                }
+            }
+        });
+
+        // Tag selection
+        document.querySelectorAll('.tag-option').forEach(option => {
+            option.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'INPUT') {
+                    const checkbox = this.querySelector('input');
+                    checkbox.checked = !checkbox.checked;
+                }
+                this.classList.toggle('selected', this.querySelector('input').checked);
+            });
+        });
+
+        // =====================================
+        // Event Listeners
+        // =====================================
+
+        // View tabs
+        document.querySelectorAll('.view-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentView = this.dataset.viewType;
+                renderView();
+            });
+        });
+
+        // Modal controls
+        document.getElementById('modal-close').addEventListener('click', closeLeadModal);
+        document.getElementById('cancel-btn').addEventListener('click', closeLeadModal);
+        document.getElementById('add-lead-btn').addEventListener('click', () => openLeadModal());
+
+        leadModal.addEventListener('click', function(e) {
+            if (e.target === this) closeLeadModal();
+        });
+
+        // Search
+        searchInput.addEventListener('input', debounce(renderView, 300));
+
+        // Filters
+        document.getElementById('filter-status').addEventListener('change', renderView);
+        document.getElementById('filter-assignee').addEventListener('change', renderView);
+        document.getElementById('filter-priority').addEventListener('change', renderView);
+
+        // Analytics toggle
+        document.getElementById('toggle-analytics').addEventListener('click', function() {
+            analyticsSection.classList.toggle('visible');
+        });
+
+        // Sidebar navigation
+        document.querySelectorAll('.nav-item[data-filter]').forEach(item => {
+            item.addEventListener('click', function() {
+                const filter = this.dataset.filter;
+                currentFilter = {};
+
+                if (filter === 'my-leads') currentFilter.myLeads = true;
+                else if (filter === 'urgent') currentFilter.tag = 'urgent';
+                else if (filter === 'high-value') currentFilter.tag = 'high-value';
+                else if (filter === 'follow-up') currentFilter.tag = 'follow-up';
+
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                this.classList.add('active');
+                renderView();
+            });
+        });
+
+        // Export
+        document.querySelector('[data-action="export"]').addEventListener('click', function() {
+            const dataStr = JSON.stringify(leads, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'cyberquell-crm-export.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showToast('Data exported successfully', 'success');
+        });
+
+        // Import
+        document.querySelector('[data-action="import"]').addEventListener('click', function() {
+            document.getElementById('import-file').click();
+        });
+
+        document.getElementById('import-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedLeads = JSON.parse(e.target.result);
+                        if (Array.isArray(importedLeads)) {
+                            leads = [...leads, ...importedLeads];
+                            saveLeads();
+                            renderView();
+                            showToast(`Imported ${importedLeads.length} leads`, 'success');
+                        }
+                    } catch (err) {
+                        showToast('Failed to import data', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Table sorting
+        document.querySelectorAll('.leads-table th[data-sort]').forEach(th => {
+            th.addEventListener('click', function() {
+                const column = this.dataset.sort;
+                if (sortColumn === column) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortColumn = column;
+                    sortDirection = 'asc';
+                }
+                renderListView();
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLeadModal();
+            if (e.key === 'n' && e.ctrlKey) {
+                e.preventDefault();
+                openLeadModal();
+            }
+        });
+
+        // =====================================
+        // Utility Functions
+        // =====================================
+
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // =====================================
+        // Initialize
+        // =====================================
+
+        function init() {
+            // Populate assignee dropdowns
+            const assigneeSelects = [document.getElementById('lead-assignee'), document.getElementById('filter-assignee')];
+            assigneeSelects.forEach(select => {
+                if (select.id === 'filter-assignee') {
+                    select.innerHTML = '<option value="">All Team</option>';
+                } else {
+                    select.innerHTML = '';
+                }
+                TEAM_MEMBERS.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.id;
+                    option.textContent = member.name;
+                    select.appendChild(option);
+                });
+            });
+
+            loadLeads();
+            renderView();
+
+            // Show analytics by default
+            analyticsSection.classList.add('visible');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
