@@ -1,11 +1,11 @@
 // DO NOT COMMIT THIS FILE
 // Copy firebase-config.example.js and fill in your own Firebase project values.
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyDILL312HfMWHSl_mvsV5FgN4gNDXdzicc",
+  authDomain: "cyberquellcrm.firebaseapp.com",
+  projectId: "cyberquellcrm",
+  storageBucket: "cyberquellcrm.firebasestorage.app",
+  messagingSenderId: "966187396196",
+  appId: "1:966187396196:web:b210b43346ec4b1ff5c371",
+  measurementId: "G-9WP1LP52MM"
 };
