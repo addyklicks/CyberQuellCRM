@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#006241">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="CyberQuell CRM">
     <title>CyberQuell CRM | Lead Management</title>
     <link rel="icon" type="image/png" href="CQ_Icon-Only_Version_Green.png">
+    <link rel="apple-touch-icon" href="CQ_Icon-Only_Version_Green.png">
+    <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -26,7 +31,7 @@
             --status-won: #10B981;
             --status-lost: #EF4444;
             --label-urgent: #EF4444;
-            --label-high-value: #F59E0B;
+            --priority-medium: #F59E0B;
             --label-follow-up: #3B82F6;
             --label-hot: #EC4899;
             --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -887,7 +892,7 @@
         }
 
         .lead-priority.high { background: var(--label-urgent); }
-        .lead-priority.medium { background: var(--label-high-value); }
+        .lead-priority.medium { background: var(--priority-medium); }
         .lead-priority.low { background: var(--status-won); }
 
         .lead-title {
@@ -935,7 +940,6 @@
         }
 
         .lead-tag.urgent { background: rgba(239, 68, 68, 0.1); color: var(--label-urgent); }
-        .lead-tag.high-value { background: rgba(245, 158, 11, 0.1); color: var(--label-high-value); }
         .lead-tag.follow-up { background: rgba(59, 130, 246, 0.1); color: var(--label-follow-up); }
         .lead-tag.hot { background: rgba(236, 72, 153, 0.1); color: var(--label-hot); }
 
@@ -975,9 +979,38 @@
             gap: 0.2rem;
         }
 
-        .lead-value {
-            font-weight: 600;
-            color: var(--watercourse);
+        .mobile-status-select {
+            display: none;
+            width: 100%;
+            margin-top: 0.55rem;
+            padding: 0.45rem 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-family: inherit;
+            background: var(--snow);
+            color: var(--text-dark);
+        }
+
+        .sync-banner {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 1.25rem;
+            background: #FEF3C7;
+            color: #92400E;
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .sync-banner.visible {
+            display: flex;
+        }
+
+        body.dark-mode .sync-banner {
+            background: #451A03;
+            color: #FDE68A;
+            border-color: #78350F;
         }
 
         /* List View */
@@ -1096,12 +1129,6 @@
         .table-status.negotiation { background: rgba(236, 72, 153, 0.1); color: var(--status-negotiation); }
         .table-status.won { background: rgba(16, 185, 129, 0.1); color: var(--status-won); }
         .table-status.lost { background: rgba(239, 68, 68, 0.1); color: var(--status-lost); }
-
-        .table-value {
-            font-weight: 600;
-            color: var(--watercourse);
-            font-size: 0.85rem;
-        }
 
         .row-select {
             width: 16px;
@@ -1600,6 +1627,8 @@
             .search-box { display: flex; width: 100%; order: 3; }
             .top-actions { margin-left: auto; }
             .online-users { display: none; }
+            .delete-drop-zone { display: none; }
+            .theme-toggle { width: 36px; height: 36px; }
 
             /* Filter bar stacks vertically */
             .filter-bar { flex-direction: column; align-items: flex-start; padding: 0.5rem 0.75rem; gap: 0.35rem; }
@@ -1613,12 +1642,14 @@
             /* Kanban — swipe horizontally, columns grow to fit all cards */
             .kanban-view { flex: none; padding: 0.5rem 0.75rem; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
             .kanban-board { height: auto; }
-            .kanban-column { width: 220px; max-height: none; height: auto; }
+            .kanban-column { width: min(86vw, 320px); max-height: none; height: auto; }
             .column-content { flex: none; overflow-y: visible; }
+            .lead-card { cursor: pointer; }
+            .mobile-status-select { display: block; }
 
             /* List view — swipe horizontally, rows visible on page scroll */
             .list-view { flex: none; padding: 0.5rem; overflow-x: auto; overflow-y: visible; }
-            .leads-table { min-width: 860px; }
+            .leads-table { min-width: 760px; }
 
             /* Modal — bottom sheet */
             .modal-overlay { align-items: flex-end; }
@@ -1728,10 +1759,6 @@
                         <i class="fas fa-fire"></i>
                         <span>Urgent</span>
                     </a>
-                    <a class="nav-item" data-filter="high-value">
-                        <i class="fas fa-gem"></i>
-                        <span>High Value</span>
-                    </a>
                     <a class="nav-item" data-filter="follow-up">
                         <i class="fas fa-clock"></i>
                         <span>Follow Up</span>
@@ -1798,6 +1825,11 @@
                 </div>
             </div>
 
+            <div class="sync-banner" id="sync-banner">
+                <i class="fas fa-wifi"></i>
+                <span id="sync-banner-text">You are offline. Changes will sync when your connection returns.</span>
+            </div>
+
             <div class="filter-bar">
                 <div class="filter-group">
                     <span class="filter-label">Status:</span>
@@ -1837,32 +1869,26 @@
                         <div class="stat-card new">
                             <div class="stat-label">New</div>
                             <div class="stat-value" id="stat-new">0</div>
-                            <div class="stat-amount" id="stat-new-amount">$0</div>
                         </div>
                         <div class="stat-card first-followup">
                             <div class="stat-label">1st Followup</div>
                             <div class="stat-value" id="stat-first-followup">0</div>
-                            <div class="stat-amount" id="stat-first-followup-amount">$0</div>
                         </div>
                         <div class="stat-card second-followup">
                             <div class="stat-label">2nd Followup</div>
                             <div class="stat-value" id="stat-second-followup">0</div>
-                            <div class="stat-amount" id="stat-second-followup-amount">$0</div>
                         </div>
                         <div class="stat-card negotiation">
                             <div class="stat-label">Negotiation</div>
                             <div class="stat-value" id="stat-negotiation">0</div>
-                            <div class="stat-amount" id="stat-negotiation-amount">$0</div>
                         </div>
                         <div class="stat-card won">
                             <div class="stat-label">Won</div>
                             <div class="stat-value" id="stat-won">0</div>
-                            <div class="stat-amount" id="stat-won-amount">$0</div>
                         </div>
                         <div class="stat-card lost">
                             <div class="stat-label">Lost</div>
                             <div class="stat-value" id="stat-lost">0</div>
-                            <div class="stat-amount" id="stat-lost-amount">$0</div>
                         </div>
                         <div class="stat-card meta">
                             <div class="stat-label">Conversion</div>
@@ -1906,7 +1932,6 @@
                                 <th data-sort="name">Lead <i class="fas fa-sort"></i></th>
                                 <th>Lead For</th>
                                 <th data-sort="status">Status <i class="fas fa-sort"></i></th>
-                                <th data-sort="value">Value <i class="fas fa-sort"></i></th>
                                 <th>Tags</th>
                                 <th data-sort="assignee">Assignee <i class="fas fa-sort"></i></th>
                                 <th>1st Follow-up</th>
@@ -1979,10 +2004,6 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="lead-value">Estimated Value ($)</label>
-                                <input type="number" id="lead-value" placeholder="e.g., 50000" min="0">
-                            </div>
-                            <div class="form-group">
                                 <label for="lead-assignee">Assignee</label>
                                 <select id="lead-assignee"></select>
                             </div>
@@ -2010,10 +2031,6 @@
                             <label class="tag-option" data-tag="urgent">
                                 <input type="checkbox" name="tags" value="urgent">
                                 <i class="fas fa-fire"></i> Urgent
-                            </label>
-                            <label class="tag-option" data-tag="high-value">
-                                <input type="checkbox" name="tags" value="high-value">
-                                <i class="fas fa-gem"></i> High Value
                             </label>
                             <label class="tag-option" data-tag="follow-up">
                                 <input type="checkbox" name="tags" value="follow-up">
@@ -2110,6 +2127,12 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
+            if (error.code !== 'failed-precondition' && error.code !== 'unimplemented') {
+                console.warn('Firestore persistence unavailable:', error);
+            }
+        });
+
         // Column definitions
         const COLUMNS = [
             { id: 'new', label: 'New' },
@@ -2163,6 +2186,8 @@
         const analyticsSection = document.getElementById('analytics-section');
         const themeToggle = document.getElementById('theme-toggle');
         const deleteDropZone = document.getElementById('delete-drop-zone');
+        const syncBanner = document.getElementById('sync-banner');
+        const syncBannerText = document.getElementById('sync-banner-text');
 
         // =====================================
         // Utility Functions
@@ -2187,16 +2212,6 @@
             }
             if (typeof value === 'string' || typeof value === 'number') return new Date(value);
             return null;
-        }
-
-        function formatCurrency(amount) {
-            if (!amount) return '$0';
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(amount);
         }
 
         function formatDate(timestamp) {
@@ -2313,6 +2328,24 @@
             const savedTheme = localStorage.getItem('cq_crm_theme');
             const preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
             applyTheme(preferredTheme);
+        }
+
+        function updateNetworkStatus() {
+            if (!syncBanner || !syncBannerText) return;
+            const isOnline = navigator.onLine;
+            syncBanner.classList.toggle('visible', !isOnline);
+            syncBannerText.textContent = isOnline
+                ? 'Back online. Syncing the latest changes.'
+                : 'You are offline. Existing records remain available and changes will sync when your connection returns.';
+        }
+
+        function registerServiceWorker() {
+            if (!('serviceWorker' in navigator)) return;
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch((error) => {
+                    console.warn('Service worker registration failed:', error);
+                });
+            });
         }
 
         // =====================================
@@ -2743,13 +2776,19 @@
 
         function renderLeadCard(lead) {
             const assignee = getTeamMember(lead.assignee);
-            const tagsHtml = lead.tags?.length 
-                ? lead.tags.map(tag => `<span class="lead-tag ${tag}">${escapeHTML(tag.replace('-', ' '))}</span>`).join('')
+            const visibleTags = (lead.tags || []).filter(tag => tag !== 'high-value');
+            const tagsHtml = visibleTags.length
+                ? visibleTags.map(tag => `<span class="lead-tag ${tag}">${escapeHTML(tag.replace('-', ' '))}</span>`).join('')
                 : '';
             const safeName = escapeHTML(lead.name || 'Untitled');
             const safeCompany = escapeHTML(lead.company || '');
             const safePurpose = escapeHTML(lead.leadPurpose || '');
             const followupDatesHtml = renderFollowupDates(lead);
+            const statusOptions = COLUMNS.map(column => `
+                <option value="${column.id}" ${normalizeStatus(lead.status) === column.id ? 'selected' : ''}>
+                    ${column.label}
+                </option>
+            `).join('');
 
             return `
                 <div class="lead-card" draggable="true" data-lead-id="${lead.id}">
@@ -2770,10 +2809,12 @@
                             }
                         </div>
                         <div class="lead-meta">
-                            ${lead.value ? `<span class="lead-value">${formatCurrency(lead.value)}</span>` : ''}
                             <span><i class="fas fa-comment"></i> ${lead.activities?.length || 0}</span>
                         </div>
                     </div>
+                    <select class="mobile-status-select" data-lead-id="${lead.id}" aria-label="Move ${safeName} to another stage">
+                        ${statusOptions}
+                    </select>
                 </div>
             `;
         }
@@ -2789,8 +2830,9 @@
             leadsTableBody.innerHTML = filteredLeads.map(lead => {
                 const assignee = getTeamMember(lead.assignee);
                 const status = normalizeStatus(lead.status);
-                const tagsHtml = lead.tags?.length 
-                    ? lead.tags.map(tag => `<span class="lead-tag ${tag}">${escapeHTML(tag.replace('-', ' '))}</span>`).join('')
+                const visibleTags = (lead.tags || []).filter(tag => tag !== 'high-value');
+                const tagsHtml = visibleTags.length
+                    ? visibleTags.map(tag => `<span class="lead-tag ${tag}">${escapeHTML(tag.replace('-', ' '))}</span>`).join('')
                     : '-';
                 const safeName = escapeHTML(lead.name || 'Untitled');
                 const safeCompany = escapeHTML(lead.company || '-');
@@ -2812,7 +2854,6 @@
                         </td>
                         <td>${safePurpose}</td>
                         <td><span class="table-status ${status}">${getStatusLabel(status)}</span></td>
-                        <td class="table-value">${formatCurrency(lead.value)}</td>
                         <td>${tagsHtml}</td>
                         <td>
                             <div class="lead-assignee" title="${escapeHTML(assignee.name)}">
@@ -2925,13 +2966,10 @@
             COLUMNS.forEach(column => {
                 const columnLeads = leads.filter(l => l.status === column.id);
                 const count = columnLeads.length;
-                const totalValue = columnLeads.reduce((sum, l) => sum + (l.value || 0), 0);
                 
                 const countEl = document.getElementById(`stat-${column.id}`);
-                const amountEl = document.getElementById(`stat-${column.id}-amount`);
                 
                 if (countEl) countEl.textContent = count;
-                if (amountEl) amountEl.textContent = formatCurrency(totalValue);
             });
 
             const total = leads.length || 1;
@@ -2964,6 +3002,7 @@
         function setupDragAndDrop() {
             const cards = document.querySelectorAll('.lead-card');
             const columns = document.querySelectorAll('.column-content');
+            const mobileStatusSelects = document.querySelectorAll('.mobile-status-select');
 
             cards.forEach(card => {
                 card.addEventListener('dragstart', (e) => {
@@ -2980,7 +3019,23 @@
                     card.classList.remove('dragging');
                     draggedCard = null;
                 });
-                card.addEventListener('click', () => openLeadModal(card.dataset.leadId));
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.mobile-status-select')) return;
+                    openLeadModal(card.dataset.leadId);
+                });
+            });
+
+            mobileStatusSelects.forEach(select => {
+                select.addEventListener('click', (e) => e.stopPropagation());
+                select.addEventListener('change', (e) => {
+                    const leadId = e.target.dataset.leadId;
+                    const newStatus = e.target.value;
+                    const lead = leads.find(l => l.id === leadId);
+
+                    if (lead && normalizeStatus(lead.status) !== newStatus) {
+                        updateLeadStatus(leadId, newStatus);
+                    }
+                });
             });
 
             columns.forEach(column => {
@@ -3064,7 +3119,6 @@
             document.getElementById('lead-phone').value = lead?.phone || '';
             document.getElementById('lead-status').value = normalizeStatus(lead?.status);
             document.getElementById('lead-priority').value = lead?.priority || 'medium';
-            document.getElementById('lead-value').value = lead?.value || '';
             document.getElementById('lead-assignee').value = lead?.assignee || currentUser.uid;
             document.getElementById('lead-purpose').value = lead?.leadPurpose || '';
             document.getElementById('lead-first-followup').value = lead?.firstFollowup || '';
@@ -3166,7 +3220,6 @@
                 phone: document.getElementById('lead-phone').value.trim(),
                 status: normalizeStatus(document.getElementById('lead-status').value),
                 priority: document.getElementById('lead-priority').value,
-                value: parseInt(document.getElementById('lead-value').value) || 0,
                 assignee: document.getElementById('lead-assignee').value,
                 leadPurpose: document.getElementById('lead-purpose').value.trim(),
                 firstFollowup: document.getElementById('lead-first-followup').value || null,
@@ -3267,7 +3320,6 @@
 
                 if (filter === 'my-leads') currentFilter.myLeads = true;
                 else if (filter === 'urgent') currentFilter.tag = 'urgent';
-                else if (filter === 'high-value') currentFilter.tag = 'high-value';
                 else if (filter === 'follow-up') currentFilter.tag = 'follow-up';
                 else if (filter === 'hot') currentFilter.tag = 'hot';
 
@@ -3456,6 +3508,9 @@
 
         document.getElementById('sidebar-backdrop').addEventListener('click', closeMobileSidebar);
 
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+
         // Close sidebar on nav item click (mobile)
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -3464,6 +3519,8 @@
         });
 
         initializeTheme();
+        updateNetworkStatus();
+        registerServiceWorker();
         setupDeleteDropZone();
     </script>
 </body>
