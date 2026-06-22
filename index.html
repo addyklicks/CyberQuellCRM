@@ -1005,6 +1005,28 @@
             justify-content: center;
         }
 
+        .delete-drop-zone {
+            min-width: 116px;
+            border: 1px dashed rgba(239, 68, 68, 0.55);
+            color: var(--label-urgent);
+            background: rgba(239, 68, 68, 0.06);
+            justify-content: center;
+        }
+
+        .delete-drop-zone:hover,
+        .delete-drop-zone.drag-over {
+            background: var(--label-urgent);
+            color: var(--white);
+            border-color: var(--label-urgent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .delete-drop-zone.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
         .leads-table th,
         .leads-table td {
             padding: 0.65rem 0.875rem;
@@ -1767,6 +1789,9 @@
                     <button class="btn btn-ghost theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
                         <i class="fas fa-moon"></i>
                     </button>
+                    <button class="btn delete-drop-zone" id="delete-drop-zone" type="button" title="Drag a lead here to delete">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
                     <button class="btn btn-primary" id="add-lead-btn">
                         <i class="fas fa-plus"></i> Add Lead
                     </button>
@@ -2137,6 +2162,7 @@
         const searchInput = document.getElementById('search-input');
         const analyticsSection = document.getElementById('analytics-section');
         const themeToggle = document.getElementById('theme-toggle');
+        const deleteDropZone = document.getElementById('delete-drop-zone');
 
         // =====================================
         // Utility Functions
@@ -2251,6 +2277,12 @@
             const bulk = document.getElementById('bulk-actions');
             if (!bulk) return;
             bulk.classList.toggle('visible', isManagerOrAdmin());
+            if (deleteDropZone) {
+                deleteDropZone.classList.toggle('disabled', !isManagerOrAdmin());
+                deleteDropZone.title = isManagerOrAdmin()
+                    ? 'Drag a lead here to delete'
+                    : 'Only managers or admins can delete leads';
+            }
         }
 
         function updateTeamManagementVisibility() {
@@ -2973,6 +3005,44 @@
                     }
                 });
             });
+
+        }
+
+        function setupDeleteDropZone() {
+            if (!deleteDropZone) return;
+
+            deleteDropZone.addEventListener('dragover', (e) => {
+                if (!draggedCard || !isManagerOrAdmin()) return;
+                e.preventDefault();
+            });
+
+            deleteDropZone.addEventListener('dragenter', (e) => {
+                if (!draggedCard || !isManagerOrAdmin()) return;
+                e.preventDefault();
+                deleteDropZone.classList.add('drag-over');
+            });
+
+            deleteDropZone.addEventListener('dragleave', () => {
+                deleteDropZone.classList.remove('drag-over');
+            });
+
+            deleteDropZone.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                deleteDropZone.classList.remove('drag-over');
+
+                if (!draggedCard) return;
+                const leadId = draggedCard.dataset.leadId;
+                const lead = leads.find(l => l.id === leadId);
+
+                if (!lead) return;
+                if (!isManagerOrAdmin()) {
+                    showToast('Only managers or admins can delete leads', 'error');
+                    return;
+                }
+                if (confirm(`Delete "${lead.name || 'this lead'}"?`)) {
+                    await deleteLead(leadId);
+                }
+            });
         }
 
         // =====================================
@@ -3394,6 +3464,7 @@
         });
 
         initializeTheme();
+        setupDeleteDropZone();
     </script>
 </body>
 </html>
