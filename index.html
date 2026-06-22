@@ -20,8 +20,8 @@
             --text-muted: #6B7280;
             --text-light: #9CA3AF;
             --status-new: #3B82F6;
-            --status-contacted: #8B5CF6;
-            --status-qualified: #F59E0B;
+            --status-first-followup: #F59E0B;
+            --status-second-followup: #14B8A6;
             --status-negotiation: #EC4899;
             --status-won: #10B981;
             --status-lost: #EF4444;
@@ -37,6 +37,20 @@
             --transition-normal: 250ms ease;
         }
 
+        body.dark-mode {
+            --white: #111827;
+            --snow: #0F172A;
+            --romance: #1F2937;
+            --text-dark: #F9FAFB;
+            --text-muted: #CBD5E1;
+            --text-light: #94A3B8;
+            --humming-bird: #D4E9E2;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.45);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.55);
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         html, body {
@@ -45,6 +59,51 @@
             background-color: var(--snow);
             color: var(--text-dark);
             overflow: hidden;
+        }
+
+        body.dark-mode .sidebar {
+            background: #020617;
+            border-right: 1px solid #1F2937;
+        }
+
+        body.dark-mode .top-bar,
+        body.dark-mode .filter-bar,
+        body.dark-mode .analytics-section,
+        body.dark-mode .modal,
+        body.dark-mode .leads-table,
+        body.dark-mode .bulk-actions,
+        body.dark-mode .team-manage {
+            border-color: #1F2937;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select,
+        body.dark-mode textarea {
+            background: #0F172A;
+            color: #F9FAFB;
+            border-color: #374151;
+        }
+
+        body.dark-mode input::placeholder,
+        body.dark-mode textarea::placeholder {
+            color: #64748B;
+        }
+
+        body.dark-mode .login-title,
+        body.dark-mode .login-subtitle,
+        body.dark-mode .login-feature {
+            color: #FFFFFF;
+        }
+
+        body.dark-mode .lead-title,
+        body.dark-mode .table-lead-title,
+        body.dark-mode .modal-title,
+        body.dark-mode .form-group label,
+        body.dark-mode .stat-value,
+        body.dark-mode .column-title,
+        body.dark-mode .team-member-name,
+        body.dark-mode .activity-author {
+            color: var(--humming-bird);
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -652,8 +711,8 @@
         }
 
         .stat-card.new::before { background: var(--status-new); }
-        .stat-card.contacted::before { background: var(--status-contacted); }
-        .stat-card.qualified::before { background: var(--status-qualified); }
+        .stat-card.first-followup::before { background: var(--status-first-followup); }
+        .stat-card.second-followup::before { background: var(--status-second-followup); }
         .stat-card.negotiation::before { background: var(--status-negotiation); }
         .stat-card.won::before { background: var(--status-won); }
         .stat-card.lost::before { background: var(--status-lost); }
@@ -684,36 +743,47 @@
             flex: 1;
             overflow-x: auto;
             overflow-y: hidden;
-            padding: 0.875rem 1.25rem;
+            padding: 0.75rem 1rem;
         }
 
         .kanban-board {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.625rem;
             height: 100%;
             min-width: max-content;
         }
 
         .kanban-column {
-            width: 280px;
-            background: var(--romance);
-            border-radius: 8px;
+            width: 288px;
+            background: var(--snow);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 0;
             display: flex;
             flex-direction: column;
             max-height: calc(100vh - 280px);
         }
 
+        body.dark-mode .kanban-column {
+            border-color: #1F2937;
+            background: #020617;
+        }
+
         .column-header {
-            padding: 0.75rem;
+            padding: 0.65rem 0.75rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 2px solid transparent;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            background: var(--white);
+        }
+
+        body.dark-mode .column-header {
+            border-color: #1F2937;
         }
 
         .column-header.new { border-color: var(--status-new); }
-        .column-header.contacted { border-color: var(--status-contacted); }
-        .column-header.qualified { border-color: var(--status-qualified); }
+        .column-header.first-followup { border-color: var(--status-first-followup); }
+        .column-header.second-followup { border-color: var(--status-second-followup); }
         .column-header.negotiation { border-color: var(--status-negotiation); }
         .column-header.won { border-color: var(--status-won); }
         .column-header.lost { border-color: var(--status-lost); }
@@ -728,11 +798,11 @@
         }
 
         .column-count {
-            background: var(--white);
+            background: var(--romance);
             color: var(--text-muted);
             font-size: 0.7rem;
             padding: 0.15rem 0.4rem;
-            border-radius: 10px;
+            border-radius: 4px;
             font-weight: 600;
         }
 
@@ -772,16 +842,22 @@
         /* Lead Cards */
         .lead-card {
             background: var(--white);
-            border-radius: 6px;
-            padding: 0.65rem;
+            border-radius: 0;
+            padding: 0.65rem 0.7rem;
             cursor: grab;
             transition: all var(--transition-fast);
             border: 1px solid rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--watercourse);
         }
 
         .lead-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.dark-mode .lead-card {
+            border-color: #374151;
+            border-left-color: var(--humming-bird);
         }
 
         .lead-card.dragging {
@@ -833,6 +909,22 @@
             flex-wrap: wrap;
             gap: 0.2rem;
             margin-bottom: 0.4rem;
+        }
+
+        .lead-followups {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .lead-followup-item {
+            font-size: 0.6rem;
+            padding: 0.15rem 0.35rem;
+            border-radius: 3px;
+            background: rgba(0, 98, 65, 0.08);
+            color: var(--watercourse);
+            white-space: nowrap;
         }
 
         .lead-tag {
@@ -901,9 +993,16 @@
         .leads-table {
             width: 100%;
             background: var(--white);
-            border-radius: 8px;
+            border-radius: 6px;
             overflow: hidden;
             border-collapse: collapse;
+        }
+
+        .theme-toggle {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            justify-content: center;
         }
 
         .leads-table th,
@@ -970,8 +1069,8 @@
         }
 
         .table-status.new { background: rgba(59, 130, 246, 0.1); color: var(--status-new); }
-        .table-status.contacted { background: rgba(139, 92, 246, 0.1); color: var(--status-contacted); }
-        .table-status.qualified { background: rgba(245, 158, 11, 0.1); color: var(--status-qualified); }
+        .table-status.first-followup { background: rgba(245, 158, 11, 0.1); color: var(--status-first-followup); }
+        .table-status.second-followup { background: rgba(20, 184, 166, 0.1); color: var(--status-second-followup); }
         .table-status.negotiation { background: rgba(236, 72, 153, 0.1); color: var(--status-negotiation); }
         .table-status.won { background: rgba(16, 185, 129, 0.1); color: var(--status-won); }
         .table-status.lost { background: rgba(239, 68, 68, 0.1); color: var(--status-lost); }
@@ -1385,6 +1484,21 @@
             justify-content: center;
             padding: 1.5rem;
             color: var(--text-muted);
+            background: transparent;
+            border: 1px dashed rgba(0, 0, 0, 0.12);
+            width: 100%;
+            min-height: 110px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        body.dark-mode .empty-state {
+            border-color: #374151;
+        }
+
+        .empty-state:hover {
+            color: var(--watercourse);
+            border-color: var(--watercourse);
         }
 
         .empty-state i {
@@ -1421,7 +1535,7 @@
 
         /* Responsive */
         @media (max-width: 1024px) {
-            .analytics-grid { grid-template-columns: repeat(4, 1fr); }
+            .analytics-grid { grid-template-columns: repeat(5, 1fr); }
         }
 
         @media (max-width: 768px) {
@@ -1429,7 +1543,7 @@
             .sidebar-title, .nav-section-title, .nav-item span, .nav-badge,
             .sidebar-user-info { display: none; }
             .nav-item { justify-content: center; padding: 0.75rem; }
-            .analytics-grid { grid-template-columns: repeat(2, 1fr); }
+            .analytics-grid { grid-template-columns: repeat(3, 1fr); }
             .search-box { display: none; }
             .form-row { grid-template-columns: 1fr; }
             .login-features { grid-template-columns: 1fr; }
@@ -1482,7 +1596,7 @@
 
             /* List view — swipe horizontally, rows visible on page scroll */
             .list-view { flex: none; padding: 0.5rem; overflow-x: auto; overflow-y: visible; }
-            .leads-table { min-width: 580px; }
+            .leads-table { min-width: 860px; }
 
             /* Modal — bottom sheet */
             .modal-overlay { align-items: flex-end; }
@@ -1650,6 +1764,9 @@
                     <button class="btn btn-ghost" id="toggle-analytics" title="Toggle Analytics">
                         <i class="fas fa-chart-pie"></i>
                     </button>
+                    <button class="btn btn-ghost theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
                     <button class="btn btn-primary" id="add-lead-btn">
                         <i class="fas fa-plus"></i> Add Lead
                     </button>
@@ -1662,8 +1779,8 @@
                     <select class="filter-select" id="filter-status">
                         <option value="">All Stages</option>
                         <option value="new">New</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="qualified">Qualified</option>
+                        <option value="first-followup">1st Followup</option>
+                        <option value="second-followup">2nd Followup</option>
                         <option value="negotiation">Negotiation</option>
                         <option value="won">Won</option>
                         <option value="lost">Lost</option>
@@ -1697,15 +1814,15 @@
                             <div class="stat-value" id="stat-new">0</div>
                             <div class="stat-amount" id="stat-new-amount">$0</div>
                         </div>
-                        <div class="stat-card contacted">
-                            <div class="stat-label">Contacted</div>
-                            <div class="stat-value" id="stat-contacted">0</div>
-                            <div class="stat-amount" id="stat-contacted-amount">$0</div>
+                        <div class="stat-card first-followup">
+                            <div class="stat-label">1st Followup</div>
+                            <div class="stat-value" id="stat-first-followup">0</div>
+                            <div class="stat-amount" id="stat-first-followup-amount">$0</div>
                         </div>
-                        <div class="stat-card qualified">
-                            <div class="stat-label">Qualified</div>
-                            <div class="stat-value" id="stat-qualified">0</div>
-                            <div class="stat-amount" id="stat-qualified-amount">$0</div>
+                        <div class="stat-card second-followup">
+                            <div class="stat-label">2nd Followup</div>
+                            <div class="stat-value" id="stat-second-followup">0</div>
+                            <div class="stat-amount" id="stat-second-followup-amount">$0</div>
                         </div>
                         <div class="stat-card negotiation">
                             <div class="stat-label">Negotiation</div>
@@ -1745,8 +1862,8 @@
                         <select id="bulk-status">
                             <option value="">Change status...</option>
                             <option value="new">New</option>
-                            <option value="contacted">Contacted</option>
-                            <option value="qualified">Qualified</option>
+                            <option value="first-followup">1st Followup</option>
+                            <option value="second-followup">2nd Followup</option>
                             <option value="negotiation">Negotiation</option>
                             <option value="won">Won</option>
                             <option value="lost">Lost</option>
@@ -1767,7 +1884,8 @@
                                 <th data-sort="value">Value <i class="fas fa-sort"></i></th>
                                 <th>Tags</th>
                                 <th data-sort="assignee">Assignee <i class="fas fa-sort"></i></th>
-                                <th>First Follow-up</th>
+                                <th>1st Follow-up</th>
+                                <th>2nd Follow-up</th>
                                 <th data-sort="created">Created <i class="fas fa-sort"></i></th>
                             </tr>
                         </thead>
@@ -1818,8 +1936,8 @@
                                 <label for="lead-status">Status</label>
                                 <select id="lead-status">
                                     <option value="new">New</option>
-                                    <option value="contacted">Contacted</option>
-                                    <option value="qualified">Qualified</option>
+                                    <option value="first-followup">1st Followup</option>
+                                    <option value="second-followup">2nd Followup</option>
                                     <option value="negotiation">Negotiation</option>
                                     <option value="won">Won</option>
                                     <option value="lost">Lost</option>
@@ -1852,6 +1970,12 @@
                             <div class="form-group">
                                 <label for="lead-first-followup">First Follow-up Sent</label>
                                 <input type="date" id="lead-first-followup">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lead-second-followup">Second Follow-up Sent</label>
+                                <input type="date" id="lead-second-followup">
                             </div>
                         </div>
                     </div>
@@ -1964,12 +2088,26 @@
         // Column definitions
         const COLUMNS = [
             { id: 'new', label: 'New' },
-            { id: 'contacted', label: 'Contacted' },
-            { id: 'qualified', label: 'Qualified' },
+            { id: 'first-followup', label: '1st Followup' },
+            { id: 'second-followup', label: '2nd Followup' },
             { id: 'negotiation', label: 'Negotiation' },
             { id: 'won', label: 'Won' },
             { id: 'lost', label: 'Lost' }
         ];
+        const WIP_LIMITS = {
+            new: 10,
+            'first-followup': 8,
+            'second-followup': 6,
+            negotiation: 5,
+            won: null,
+            lost: null
+        };
+        const STATUS_LABELS = Object.fromEntries(COLUMNS.map(column => [column.id, column.label]));
+        const LEGACY_STATUS_MAP = {
+            contacted: 'first-followup',
+            qualified: 'second-followup',
+            'third-followup': 'second-followup'
+        };
 
         // State
         let currentUser = null;
@@ -1998,6 +2136,7 @@
         const leadForm = document.getElementById('lead-form');
         const searchInput = document.getElementById('search-input');
         const analyticsSection = document.getElementById('analytics-section');
+        const themeToggle = document.getElementById('theme-toggle');
 
         // =====================================
         // Utility Functions
@@ -2038,6 +2177,16 @@
             const date = toDate(timestamp);
             if (!date || Number.isNaN(date.getTime())) return '-';
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function normalizeStatus(status) {
+            const mappedStatus = LEGACY_STATUS_MAP[status] || status;
+            return STATUS_LABELS[mappedStatus] ? mappedStatus : 'new';
+        }
+
+        function getStatusLabel(status) {
+            const normalizedStatus = normalizeStatus(status);
+            return STATUS_LABELS[normalizedStatus] || 'New';
         }
 
         function getTimeAgo(timestamp) {
@@ -2116,6 +2265,22 @@
                 clearTimeout(timeout);
                 timeout = setTimeout(() => func.apply(this, args), wait);
             };
+        }
+
+        function applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.classList.toggle('dark-mode', isDark);
+            if (themeToggle) {
+                themeToggle.innerHTML = `<i class="fas fa-${isDark ? 'sun' : 'moon'}"></i>`;
+                themeToggle.title = `Switch to ${isDark ? 'light' : 'dark'} mode`;
+                themeToggle.setAttribute('aria-label', `Switch to ${isDark ? 'light' : 'dark'} mode`);
+            }
+        }
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('cq_crm_theme');
+            const preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(preferredTheme);
         }
 
         // =====================================
@@ -2237,10 +2402,14 @@
             unsubscribeLeads = db.collection('leads')
                 .orderBy('createdAt', 'desc')
                 .onSnapshot((snapshot) => {
-                    leads = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
+                    leads = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return {
+                            id: doc.id,
+                            ...data,
+                            status: normalizeStatus(data.status)
+                        };
+                    });
                     renderView();
                 }, (error) => {
                     console.error('Leads listener error:', error);
@@ -2371,7 +2540,7 @@
                     showToast('You do not have permission to update this lead', 'error');
                     return;
                 }
-                const oldStatus = lead?.status || 'unknown';
+                const oldStatus = normalizeStatus(lead?.status);
 
                 await db.collection('leads').doc(leadId).update({
                     status: newStatus,
@@ -2379,14 +2548,14 @@
                     updatedBy: currentUser.uid,
                     activities: firebase.firestore.FieldValue.arrayUnion({
                         type: 'status',
-                        text: `Moved from ${oldStatus} to ${newStatus}`,
+                        text: `Moved from ${getStatusLabel(oldStatus)} to ${getStatusLabel(newStatus)}`,
                         userId: currentUser.uid,
                         userName: currentUser.displayName,
                         userPhoto: currentUser.photoURL,
                         timestamp: new Date()
                     })
                 });
-                showToast(`Lead moved to ${newStatus}`, 'success');
+                showToast(`Lead moved to ${getStatusLabel(newStatus)}`, 'success');
             } catch (error) {
                 console.error('Update status error:', error);
                 showToast('Failed to update lead', 'error');
@@ -2489,6 +2658,8 @@
 
             COLUMNS.forEach(column => {
                 const columnLeads = filteredLeads.filter(lead => lead.status === column.id);
+                const wipLimit = WIP_LIMITS[column.id];
+                const columnCount = wipLimit === null ? columnLeads.length : `${columnLeads.length} / ${wipLimit}`;
                 
                 const columnEl = document.createElement('div');
                 columnEl.className = 'kanban-column';
@@ -2498,7 +2669,7 @@
                     <div class="column-header ${column.id}">
                         <div class="column-title">
                             ${column.label}
-                            <span class="column-count">${columnLeads.length}</span>
+                            <span class="column-count">${columnCount}</span>
                         </div>
                         <button class="column-action-btn" onclick="addLeadToColumn('${column.id}')" title="Add lead">
                             <i class="fas fa-plus"></i>
@@ -2506,7 +2677,7 @@
                     </div>
                     <div class="column-content" data-column="${column.id}">
                         ${columnLeads.length === 0 
-                            ? '<div class="empty-state"><i class="fas fa-inbox"></i><p>No leads</p></div>'
+                            ? `<button class="empty-state column-empty-action" type="button" onclick="addLeadToColumn('${column.id}')"><i class="fas fa-plus"></i><p>Create a lead</p></button>`
                             : columnLeads.map(lead => renderLeadCard(lead)).join('')
                         }
                     </div>
@@ -2519,6 +2690,25 @@
             updateCounts(filteredLeads);
         }
 
+        function renderFollowupDates(lead) {
+            const followups = [
+                { label: '1st', value: lead.firstFollowup },
+                { label: '2nd', value: lead.secondFollowup }
+            ].filter(item => item.value);
+
+            if (!followups.length) return '';
+
+            return `
+                <div class="lead-followups">
+                    ${followups.map(item => `
+                        <span class="lead-followup-item">
+                            <i class="fas fa-calendar-alt"></i> ${item.label}: ${formatDate(item.value)}
+                        </span>
+                    `).join('')}
+                </div>
+            `;
+        }
+
         function renderLeadCard(lead) {
             const assignee = getTeamMember(lead.assignee);
             const tagsHtml = lead.tags?.length 
@@ -2527,6 +2717,7 @@
             const safeName = escapeHTML(lead.name || 'Untitled');
             const safeCompany = escapeHTML(lead.company || '');
             const safePurpose = escapeHTML(lead.leadPurpose || '');
+            const followupDatesHtml = renderFollowupDates(lead);
 
             return `
                 <div class="lead-card" draggable="true" data-lead-id="${lead.id}">
@@ -2537,6 +2728,7 @@
                     <div class="lead-title">${safeName}</div>
                     ${safeCompany ? `<div class="lead-company">${safeCompany}</div>` : ''}
                     ${safePurpose ? `<div class="lead-purpose">For: ${safePurpose}</div>` : ''}
+                    ${followupDatesHtml}
                     ${tagsHtml ? `<div class="lead-tags">${tagsHtml}</div>` : ''}
                     <div class="lead-footer">
                         <div class="lead-assignee" title="${escapeHTML(assignee.name)}">
@@ -2564,6 +2756,7 @@
 
             leadsTableBody.innerHTML = filteredLeads.map(lead => {
                 const assignee = getTeamMember(lead.assignee);
+                const status = normalizeStatus(lead.status);
                 const tagsHtml = lead.tags?.length 
                     ? lead.tags.map(tag => `<span class="lead-tag ${tag}">${escapeHTML(tag.replace('-', ' '))}</span>`).join('')
                     : '-';
@@ -2586,7 +2779,7 @@
                             </div>
                         </td>
                         <td>${safePurpose}</td>
-                        <td><span class="table-status ${lead.status}">${lead.status}</span></td>
+                        <td><span class="table-status ${status}">${getStatusLabel(status)}</span></td>
                         <td class="table-value">${formatCurrency(lead.value)}</td>
                         <td>${tagsHtml}</td>
                         <td>
@@ -2598,6 +2791,7 @@
                             </div>
                         </td>
                         <td>${formatDate(lead.firstFollowup)}</td>
+                        <td>${formatDate(lead.secondFollowup)}</td>
                         <td>${formatDate(lead.createdAt)}</td>
                     </tr>
                 `;
@@ -2660,7 +2854,7 @@
             const batch = db.batch();
             selectedLeadIds.forEach(id => {
                 const lead = leads.find(l => l.id === id);
-                const oldStatus = lead?.status || 'unknown';
+                const oldStatus = normalizeStatus(lead?.status);
                 const ref = db.collection('leads').doc(id);
                 batch.update(ref, {
                     status: newStatus,
@@ -2668,7 +2862,7 @@
                     updatedBy: currentUser.uid,
                     activities: firebase.firestore.FieldValue.arrayUnion({
                         type: 'status',
-                        text: `Moved from ${oldStatus} to ${newStatus}`,
+                        text: `Moved from ${getStatusLabel(oldStatus)} to ${getStatusLabel(newStatus)}`,
                         userId: currentUser.uid,
                         userName: currentUser.displayName,
                         userPhoto: currentUser.photoURL,
@@ -2798,12 +2992,13 @@
             document.getElementById('lead-company').value = lead?.company || '';
             document.getElementById('lead-email').value = lead?.email || '';
             document.getElementById('lead-phone').value = lead?.phone || '';
-            document.getElementById('lead-status').value = lead?.status || 'new';
+            document.getElementById('lead-status').value = normalizeStatus(lead?.status);
             document.getElementById('lead-priority').value = lead?.priority || 'medium';
             document.getElementById('lead-value').value = lead?.value || '';
             document.getElementById('lead-assignee').value = lead?.assignee || currentUser.uid;
             document.getElementById('lead-purpose').value = lead?.leadPurpose || '';
             document.getElementById('lead-first-followup').value = lead?.firstFollowup || '';
+            document.getElementById('lead-second-followup').value = lead?.secondFollowup || '';
             document.getElementById('lead-notes').value = lead?.notes || '';
 
             // Tags
@@ -2899,12 +3094,13 @@
                 company: document.getElementById('lead-company').value.trim(),
                 email: document.getElementById('lead-email').value.trim(),
                 phone: document.getElementById('lead-phone').value.trim(),
-                status: document.getElementById('lead-status').value,
+                status: normalizeStatus(document.getElementById('lead-status').value),
                 priority: document.getElementById('lead-priority').value,
                 value: parseInt(document.getElementById('lead-value').value) || 0,
                 assignee: document.getElementById('lead-assignee').value,
                 leadPurpose: document.getElementById('lead-purpose').value.trim(),
                 firstFollowup: document.getElementById('lead-first-followup').value || null,
+                secondFollowup: document.getElementById('lead-second-followup').value || null,
                 notes: document.getElementById('lead-notes').value.trim(),
                 tags: Array.from(document.querySelectorAll('.tag-option input:checked')).map(cb => cb.value),
                 activities: editingLeadId 
@@ -2985,6 +3181,12 @@
         // Analytics toggle
         document.getElementById('toggle-analytics').addEventListener('click', () => {
             analyticsSection.classList.toggle('visible');
+        });
+
+        themeToggle.addEventListener('click', () => {
+            const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+            localStorage.setItem('cq_crm_theme', nextTheme);
+            applyTheme(nextTheme);
         });
 
         // Sidebar navigation
@@ -3190,6 +3392,8 @@
                 if (window.innerWidth <= 480) closeMobileSidebar();
             });
         });
+
+        initializeTheme();
     </script>
 </body>
 </html>
