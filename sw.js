@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cyberquell-crm-shell-v1';
+const CACHE_NAME = 'cyberquell-crm-shell-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -28,8 +28,20 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   const isFirebaseRequest = url.hostname.includes('firebase') || url.hostname.includes('googleapis');
   const isFirebaseConfig = url.pathname.endsWith('/firebase-config.js');
+  const isAppShell = event.request.mode === 'navigate' || url.pathname.endsWith('/index.html');
 
   if (isFirebaseRequest || isFirebaseConfig) return;
+
+  if (isAppShell) {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', responseToCache));
+        return response;
+      }).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
