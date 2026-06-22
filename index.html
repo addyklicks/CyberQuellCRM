@@ -31,9 +31,7 @@
             --status-won: #10B981;
             --status-lost: #EF4444;
             --label-urgent: #EF4444;
-            --priority-medium: #F59E0B;
             --label-follow-up: #3B82F6;
-            --label-hot: #EC4899;
             --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -884,17 +882,6 @@
             font-weight: 500;
         }
 
-        .lead-priority {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .lead-priority.high { background: var(--label-urgent); }
-        .lead-priority.medium { background: var(--priority-medium); }
-        .lead-priority.low { background: var(--status-won); }
-
         .lead-title {
             font-weight: 600;
             font-size: 0.85rem;
@@ -906,13 +893,6 @@
         .lead-company {
             font-size: 0.75rem;
             color: var(--text-muted);
-            margin-bottom: 0.4rem;
-        }
-
-        .lead-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.2rem;
             margin-bottom: 0.4rem;
         }
 
@@ -931,17 +911,6 @@
             color: var(--watercourse);
             white-space: nowrap;
         }
-
-        .lead-tag {
-            font-size: 0.6rem;
-            padding: 0.15rem 0.35rem;
-            border-radius: 3px;
-            font-weight: 500;
-        }
-
-        .lead-tag.urgent { background: rgba(239, 68, 68, 0.1); color: var(--label-urgent); }
-        .lead-tag.follow-up { background: rgba(59, 130, 246, 0.1); color: var(--label-follow-up); }
-        .lead-tag.hot { background: rgba(236, 72, 153, 0.1); color: var(--label-hot); }
 
         .lead-footer {
             display: flex;
@@ -1106,7 +1075,7 @@
             color: var(--text-muted);
         }
 
-        .lead-purpose {
+        .lead-service {
             font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: 0.35rem;
@@ -1265,34 +1234,6 @@
             min-height: 80px;
             resize: vertical;
         }
-
-        .tag-selector {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-        }
-
-        .tag-option {
-            display: flex;
-            align-items: center;
-            gap: 0.2rem;
-            padding: 0.35rem 0.6rem;
-            border: 1px solid rgba(0, 0, 0, 0.15);
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: all var(--transition-fast);
-        }
-
-        .tag-option:hover { border-color: var(--watercourse); }
-
-        .tag-option.selected {
-            background: var(--humming-bird);
-            border-color: var(--watercourse);
-            color: var(--racing-green);
-        }
-
-        .tag-option input { display: none; }
 
         /* Activity Section */
         .activity-list {
@@ -1475,6 +1416,57 @@
             margin-top: 0.5rem;
             font-size: 0.75rem;
             color: var(--text-muted);
+        }
+
+        .settings-panel {
+            padding: 1rem;
+            border: 1px dashed rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            background: var(--snow);
+        }
+
+        .settings-panel.hidden { display: none; }
+
+        .settings-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.75rem;
+        }
+
+        .settings-row input {
+            flex: 1;
+            padding: 0.5rem 0.6rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .service-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.75rem;
+        }
+
+        .service-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.55rem;
+            background: var(--white);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .service-chip button {
+            border: none;
+            background: transparent;
+            color: var(--label-urgent);
+            cursor: pointer;
         }
 
         .team-member-actions {
@@ -1754,21 +1746,6 @@
                     </a>
                 </div>
                 <div class="nav-section">
-                    <div class="nav-section-title">Quick Filters</div>
-                    <a class="nav-item" data-filter="urgent">
-                        <i class="fas fa-fire"></i>
-                        <span>Urgent</span>
-                    </a>
-                    <a class="nav-item" data-filter="follow-up">
-                        <i class="fas fa-clock"></i>
-                        <span>Follow Up</span>
-                    </a>
-                    <a class="nav-item" data-filter="hot">
-                        <i class="fas fa-star"></i>
-                        <span>Hot Leads</span>
-                    </a>
-                </div>
-                <div class="nav-section">
                     <div class="nav-section-title">Manage</div>
                     <a class="nav-item" id="team-nav-btn">
                         <i class="fas fa-users-cog"></i>
@@ -1849,15 +1826,6 @@
                         <option value="">All Team</option>
                     </select>
                 </div>
-                <div class="filter-group">
-                    <span class="filter-label">Priority:</span>
-                    <select class="filter-select" id="filter-priority">
-                        <option value="">Any</option>
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
-                    </select>
-                </div>
                 <div class="lead-count">
                     Showing <strong id="visible-count">0</strong> of <strong id="total-count">0</strong> leads
                 </div>
@@ -1930,9 +1898,9 @@
                                     <input type="checkbox" class="row-select" id="select-all">
                                 </th>
                                 <th data-sort="name">Lead <i class="fas fa-sort"></i></th>
-                                <th>Lead For</th>
+                                <th>Primary Contact</th>
+                                <th>Service</th>
                                 <th data-sort="status">Status <i class="fas fa-sort"></i></th>
-                                <th>Tags</th>
                                 <th data-sort="assignee">Assignee <i class="fas fa-sort"></i></th>
                                 <th>1st Follow-up</th>
                                 <th>2nd Follow-up</th>
@@ -1957,22 +1925,31 @@
                 <form id="lead-form">
                     <input type="hidden" id="lead-id">
                     <div class="modal-section">
-                        <h3 class="modal-section-title">Basic Information</h3>
+                        <h3 class="modal-section-title">Lead</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="lead-name">Lead Name *</label>
-                                <input type="text" id="lead-name" required placeholder="e.g., Enterprise Security Deal">
+                                <label for="lead-name">Lead *</label>
+                                <input type="text" id="lead-name" required placeholder="e.g., Enterprise security inquiry">
                             </div>
                             <div class="form-group">
                                 <label for="lead-company">Company</label>
                                 <input type="text" id="lead-company" placeholder="e.g., Acme Corporation">
                             </div>
                         </div>
+                    </div>
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">Primary Contact</h3>
                         <div class="form-row">
+                            <div class="form-group">
+                                <label for="lead-contact-name">Name</label>
+                                <input type="text" id="lead-contact-name" placeholder="e.g., Jane Doe">
+                            </div>
                             <div class="form-group">
                                 <label for="lead-email">Email</label>
                                 <input type="email" id="lead-email" placeholder="e.g., contact@acme.com">
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="lead-phone">Phone</label>
                                 <input type="tel" id="lead-phone" placeholder="e.g., +1 (555) 123-4567">
@@ -1982,6 +1959,10 @@
                     <div class="modal-section">
                         <h3 class="modal-section-title">Lead Details</h3>
                         <div class="form-row">
+                            <div class="form-group">
+                                <label for="lead-service">Service</label>
+                                <select id="lead-service"></select>
+                            </div>
                             <div class="form-group">
                                 <label for="lead-status">Status</label>
                                 <select id="lead-status">
@@ -1993,53 +1974,22 @@
                                     <option value="lost">Lost</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="lead-priority">Priority</label>
-                                <select id="lead-priority">
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
-                                    <option value="low">Low</option>
-                                </select>
-                            </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="lead-assignee">Assignee</label>
                                 <select id="lead-assignee"></select>
                             </div>
-                        </div>
-                        <div class="form-row">
                             <div class="form-group">
-                                <label for="lead-purpose">What is this lead for?</label>
-                                <input type="text" id="lead-purpose" placeholder="e.g., MDR renewal, SOC buildout">
-                            </div>
-                            <div class="form-group">
-                                <label for="lead-first-followup">First Follow-up Sent</label>
+                                <label for="lead-first-followup">First Follow-up</label>
                                 <input type="date" id="lead-first-followup">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="lead-second-followup">Second Follow-up Sent</label>
+                                <label for="lead-second-followup">Second Follow-up</label>
                                 <input type="date" id="lead-second-followup">
                             </div>
-                        </div>
-                    </div>
-                    <div class="modal-section">
-                        <h3 class="modal-section-title">Tags</h3>
-                        <div class="tag-selector" id="tag-selector">
-                            <label class="tag-option" data-tag="urgent">
-                                <input type="checkbox" name="tags" value="urgent">
-                                <i class="fas fa-fire"></i> Urgent
-                            </label>
-                            <label class="tag-option" data-tag="follow-up">
-                                <input type="checkbox" name="tags" value="follow-up">
-                                <i class="fas fa-clock"></i> Follow Up
-                            </label>
-                            <label class="tag-option" data-tag="hot">
-                                <input type="checkbox" name="tags" value="hot">
-                                <i class="fas fa-star"></i> Hot
-                            </label>
                         </div>
                     </div>
                     <div class="modal-section">
@@ -2085,6 +2035,27 @@
                 <button class="modal-close" id="team-modal-close"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
+                <div class="settings-panel" id="telegram-settings">
+                    <h3 class="modal-section-title">Telegram Reminders</h3>
+                    <div class="settings-row">
+                        <input type="text" id="telegram-chat-id" placeholder="Telegram chat ID">
+                        <button type="button" class="btn btn-primary" id="save-telegram-btn">
+                            <i class="fas fa-bell"></i> Save
+                        </button>
+                    </div>
+                    <div class="team-note">Used by the Telegram reminder script to send follow-up due alerts.</div>
+                </div>
+                <div class="settings-panel hidden" id="service-manage">
+                    <h3 class="modal-section-title">Services</h3>
+                    <div class="settings-row">
+                        <input type="text" id="service-name" placeholder="Add service, e.g., Incident Response">
+                        <button type="button" class="btn btn-primary" id="add-service-btn">
+                            <i class="fas fa-plus"></i> Add Service
+                        </button>
+                    </div>
+                    <div class="service-list" id="service-list"></div>
+                    <div class="team-note">Admins and managers can update the service dropdown used on leads.</div>
+                </div>
                 <div class="team-manage hidden" id="team-manage">
                     <h3 class="modal-section-title">Manage Team</h3>
                     <div class="team-form">
@@ -2156,6 +2127,7 @@
             qualified: 'second-followup',
             'third-followup': 'second-followup'
         };
+        const DEFAULT_SERVICE_OPTIONS = ['MXDR', 'White Label', 'Defederation', 'Other'];
 
         // State
         let currentUser = null;
@@ -2167,8 +2139,10 @@
         let editingLeadId = null;
         let unsubscribeLeads = null;
         let unsubscribeTeam = null;
+        let unsubscribeSettings = null;
         let heartbeatInterval = null;
         let lastRenderedLeadIds = [];
+        let serviceOptions = [...DEFAULT_SERVICE_OPTIONS];
         const selectedLeadIds = new Set();
 
         // DOM Elements
@@ -2188,6 +2162,10 @@
         const deleteDropZone = document.getElementById('delete-drop-zone');
         const syncBanner = document.getElementById('sync-banner');
         const syncBannerText = document.getElementById('sync-banner-text');
+        const serviceManage = document.getElementById('service-manage');
+        const serviceList = document.getElementById('service-list');
+        const leadServiceSelect = document.getElementById('lead-service');
+        const telegramChatIdInput = document.getElementById('telegram-chat-id');
 
         // =====================================
         // Utility Functions
@@ -2304,6 +2282,9 @@
             const manage = document.getElementById('team-manage');
             if (!manage) return;
             manage.classList.toggle('hidden', !isManagerOrAdmin());
+            if (serviceManage) {
+                serviceManage.classList.toggle('hidden', !isManagerOrAdmin());
+            }
         }
 
         function debounce(func, wait) {
@@ -2374,6 +2355,7 @@
             try {
                 if (unsubscribeLeads) unsubscribeLeads();
                 if (unsubscribeTeam) unsubscribeTeam();
+                if (unsubscribeSettings) unsubscribeSettings();
                 if (heartbeatInterval) clearInterval(heartbeatInterval);
                 await auth.signOut();
             } catch (error) {
@@ -2391,6 +2373,7 @@
                 } else {
                     currentUser = null;
                     currentUserRole = 'member';
+                    if (unsubscribeSettings) unsubscribeSettings();
                     if (heartbeatInterval) clearInterval(heartbeatInterval);
                     showLogin();
                 }
@@ -2456,6 +2439,10 @@
             document.getElementById('user-name').textContent = currentUser.displayName;
             document.getElementById('user-email').textContent = currentUser.email;
             document.getElementById('comment-avatar').src = currentUser.photoURL || '';
+            if (telegramChatIdInput) {
+                const self = teamMembers.find(member => member.id === currentUser.uid);
+                telegramChatIdInput.value = self?.telegramChatId || '';
+            }
         }
 
         // =====================================
@@ -2494,10 +2481,28 @@
                         updateBulkActionsVisibility();
                         updateTeamManagementVisibility();
                     }
+                    if (telegramChatIdInput && self) {
+                        telegramChatIdInput.value = self.telegramChatId || '';
+                    }
                     updateAssigneeDropdowns();
                     updateOnlineUsers();
                 }, (error) => {
                     console.error('Team listener error:', error);
+                });
+
+            unsubscribeSettings = db.collection('settings').doc('leadServices')
+                .onSnapshot((doc) => {
+                    const options = doc.exists ? doc.data().options : null;
+                    serviceOptions = Array.isArray(options) && options.length
+                        ? options.filter(option => typeof option === 'string' && option.trim()).map(option => option.trim())
+                        : [...DEFAULT_SERVICE_OPTIONS];
+                    updateServiceDropdowns();
+                    renderServiceList();
+                }, (error) => {
+                    console.error('Settings listener error:', error);
+                    serviceOptions = [...DEFAULT_SERVICE_OPTIONS];
+                    updateServiceDropdowns();
+                    renderServiceList();
                 });
         }
 
@@ -2523,6 +2528,88 @@
 
                 if (currentValue) select.value = currentValue;
             });
+        }
+
+        function updateServiceDropdowns(selectedValue = '') {
+            if (!leadServiceSelect) return;
+            const currentValue = selectedValue || leadServiceSelect.value;
+            const options = currentValue && !serviceOptions.includes(currentValue)
+                ? [...serviceOptions, currentValue]
+                : serviceOptions;
+
+            leadServiceSelect.innerHTML = options.map(service => `
+                <option value="${escapeHTML(service)}">${escapeHTML(service)}</option>
+            `).join('');
+
+            if (currentValue && options.includes(currentValue)) {
+                leadServiceSelect.value = currentValue;
+            }
+        }
+
+        function renderServiceList() {
+            if (!serviceList) return;
+            serviceList.innerHTML = serviceOptions.map(service => `
+                <span class="service-chip">
+                    ${escapeHTML(service)}
+                    ${isManagerOrAdmin() && serviceOptions.length > 1
+                        ? `<button type="button" class="remove-service-btn" data-service="${escapeHTML(service)}" title="Remove ${escapeHTML(service)}">
+                            <i class="fas fa-times"></i>
+                           </button>`
+                        : ''
+                    }
+                </span>
+            `).join('');
+
+            serviceList.querySelectorAll('.remove-service-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    await removeServiceOption(button.dataset.service);
+                });
+            });
+        }
+
+        async function saveServiceOptions(nextOptions) {
+            if (!isManagerOrAdmin()) {
+                showToast('Only managers or admins can update services', 'error');
+                return;
+            }
+
+            const cleaned = [...new Set(nextOptions.map(option => option.trim()).filter(Boolean))];
+            if (!cleaned.length) {
+                showToast('Keep at least one service option', 'error');
+                return;
+            }
+
+            await db.collection('settings').doc('leadServices').set({
+                options: cleaned,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedBy: currentUser.uid,
+            }, { merge: true });
+        }
+
+        async function addServiceOption() {
+            const input = document.getElementById('service-name');
+            const service = input.value.trim();
+            if (!service) return;
+
+            await saveServiceOptions([...serviceOptions, service]);
+            input.value = '';
+            showToast('Service added', 'success');
+        }
+
+        async function removeServiceOption(service) {
+            if (!confirm(`Remove "${service}" from service options?`)) return;
+            await saveServiceOptions(serviceOptions.filter(option => option !== service));
+            showToast('Service removed', 'success');
+        }
+
+        async function saveTelegramSettings() {
+            if (!currentUser) return;
+            await db.collection('users').doc(currentUser.uid).set({
+                telegramChatId: telegramChatIdInput.value.trim(),
+                telegramRemindersEnabled: Boolean(telegramChatIdInput.value.trim()),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+            showToast('Telegram reminder settings saved', 'success');
         }
 
         function updateOnlineUsers() {
@@ -2665,8 +2752,9 @@
                 filtered = filtered.filter(lead =>
                     (lead.name && lead.name.toLowerCase().includes(search)) ||
                     (lead.company && lead.company.toLowerCase().includes(search)) ||
+                    (lead.contactName && lead.contactName.toLowerCase().includes(search)) ||
                     (lead.email && lead.email.toLowerCase().includes(search)) ||
-                    (lead.leadPurpose && lead.leadPurpose.toLowerCase().includes(search))
+                    (lead.serviceType && lead.serviceType.toLowerCase().includes(search))
                 );
             }
 
@@ -2680,17 +2768,6 @@
             const assigneeFilter = document.getElementById('filter-assignee').value;
             if (assigneeFilter) {
                 filtered = filtered.filter(lead => lead.assignee === assigneeFilter);
-            }
-
-            // Priority filter
-            const priorityFilter = document.getElementById('filter-priority').value;
-            if (priorityFilter) {
-                filtered = filtered.filter(lead => lead.priority === priorityFilter);
-            }
-
-            // Quick filters
-            if (currentFilter.tag) {
-                filtered = filtered.filter(lead => lead.tags && lead.tags.includes(currentFilter.tag));
             }
 
             if (currentFilter.myLeads) {
@@ -2776,13 +2853,10 @@
 
         function renderLeadCard(lead) {
             const assignee = getTeamMember(lead.assignee);
-            const visibleTags = (lead.tags || []).filter(tag => tag !== 'high-value');
-            const tagsHtml = visibleTags.length
-                ? visibleTags.map(tag => `<span class="lead-tag ${tag}">${escapeHTML(tag.replace('-', ' '))}</span>`).join('')
-                : '';
             const safeName = escapeHTML(lead.name || 'Untitled');
             const safeCompany = escapeHTML(lead.company || '');
-            const safePurpose = escapeHTML(lead.leadPurpose || '');
+            const safeContact = escapeHTML(lead.contactName || lead.email || 'No contact');
+            const safeService = escapeHTML(lead.serviceType || lead.leadPurpose || 'Unassigned service');
             const followupDatesHtml = renderFollowupDates(lead);
             const statusOptions = COLUMNS.map(column => `
                 <option value="${column.id}" ${normalizeStatus(lead.status) === column.id ? 'selected' : ''}>
@@ -2794,13 +2868,12 @@
                 <div class="lead-card" draggable="true" data-lead-id="${lead.id}">
                     <div class="lead-card-header">
                         <span class="lead-id">#${lead.id.slice(-6).toUpperCase()}</span>
-                        <span class="lead-priority ${lead.priority || 'medium'}"></span>
                     </div>
                     <div class="lead-title">${safeName}</div>
                     ${safeCompany ? `<div class="lead-company">${safeCompany}</div>` : ''}
-                    ${safePurpose ? `<div class="lead-purpose">For: ${safePurpose}</div>` : ''}
+                    <div class="lead-service">Contact: ${safeContact}</div>
+                    <div class="lead-service">Service: ${safeService}</div>
                     ${followupDatesHtml}
-                    ${tagsHtml ? `<div class="lead-tags">${tagsHtml}</div>` : ''}
                     <div class="lead-footer">
                         <div class="lead-assignee" title="${escapeHTML(assignee.name)}">
                             ${assignee.photoURL 
@@ -2830,13 +2903,10 @@
             leadsTableBody.innerHTML = filteredLeads.map(lead => {
                 const assignee = getTeamMember(lead.assignee);
                 const status = normalizeStatus(lead.status);
-                const visibleTags = (lead.tags || []).filter(tag => tag !== 'high-value');
-                const tagsHtml = visibleTags.length
-                    ? visibleTags.map(tag => `<span class="lead-tag ${tag}">${escapeHTML(tag.replace('-', ' '))}</span>`).join('')
-                    : '-';
                 const safeName = escapeHTML(lead.name || 'Untitled');
                 const safeCompany = escapeHTML(lead.company || '-');
-                const safePurpose = escapeHTML(lead.leadPurpose || '-');
+                const safeContact = escapeHTML(lead.contactName || lead.email || '-');
+                const safeService = escapeHTML(lead.serviceType || lead.leadPurpose || '-');
 
                 return `
                     <tr data-lead-id="${lead.id}">
@@ -2845,16 +2915,15 @@
                         </td>
                         <td>
                             <div class="table-lead-name">
-                                <span class="lead-priority ${lead.priority || 'medium'}"></span>
                                 <div class="table-lead-info">
                                     <span class="table-lead-title">${safeName}</span>
                                     <span class="table-lead-company">${safeCompany}</span>
                                 </div>
                             </div>
                         </td>
-                        <td>${safePurpose}</td>
+                        <td>${safeContact}</td>
+                        <td>${safeService}</td>
                         <td><span class="table-status ${status}">${getStatusLabel(status)}</span></td>
-                        <td>${tagsHtml}</td>
                         <td>
                             <div class="lead-assignee" title="${escapeHTML(assignee.name)}">
                                 ${assignee.photoURL 
@@ -3115,23 +3184,15 @@
             document.getElementById('lead-id').value = lead?.id || '';
             document.getElementById('lead-name').value = lead?.name || '';
             document.getElementById('lead-company').value = lead?.company || '';
+            document.getElementById('lead-contact-name').value = lead?.contactName || '';
             document.getElementById('lead-email').value = lead?.email || '';
             document.getElementById('lead-phone').value = lead?.phone || '';
             document.getElementById('lead-status').value = normalizeStatus(lead?.status);
-            document.getElementById('lead-priority').value = lead?.priority || 'medium';
+            updateServiceDropdowns(lead?.serviceType || lead?.leadPurpose || serviceOptions[0]);
             document.getElementById('lead-assignee').value = lead?.assignee || currentUser.uid;
-            document.getElementById('lead-purpose').value = lead?.leadPurpose || '';
             document.getElementById('lead-first-followup').value = lead?.firstFollowup || '';
             document.getElementById('lead-second-followup').value = lead?.secondFollowup || '';
             document.getElementById('lead-notes').value = lead?.notes || '';
-
-            // Tags
-            document.querySelectorAll('.tag-option').forEach(option => {
-                const checkbox = option.querySelector('input');
-                const isSelected = lead?.tags?.includes(checkbox.value);
-                checkbox.checked = isSelected;
-                option.classList.toggle('selected', isSelected);
-            });
 
             // Activities
             if (lead?.activities) {
@@ -3216,16 +3277,15 @@
                 id: editingLeadId || null,
                 name: document.getElementById('lead-name').value.trim(),
                 company: document.getElementById('lead-company').value.trim(),
+                contactName: document.getElementById('lead-contact-name').value.trim(),
                 email: document.getElementById('lead-email').value.trim(),
                 phone: document.getElementById('lead-phone').value.trim(),
                 status: normalizeStatus(document.getElementById('lead-status').value),
-                priority: document.getElementById('lead-priority').value,
+                serviceType: document.getElementById('lead-service').value,
                 assignee: document.getElementById('lead-assignee').value,
-                leadPurpose: document.getElementById('lead-purpose').value.trim(),
                 firstFollowup: document.getElementById('lead-first-followup').value || null,
                 secondFollowup: document.getElementById('lead-second-followup').value || null,
                 notes: document.getElementById('lead-notes').value.trim(),
-                tags: Array.from(document.querySelectorAll('.tag-option input:checked')).map(cb => cb.value),
                 activities: editingLeadId 
                     ? leads.find(l => l.id === editingLeadId)?.activities || []
                     : [{
@@ -3287,8 +3347,6 @@
         // Filters
         document.getElementById('filter-status').addEventListener('change', renderView);
         document.getElementById('filter-assignee').addEventListener('change', renderView);
-        document.getElementById('filter-priority').addEventListener('change', renderView);
-
         // Bulk actions
         document.getElementById('select-all').addEventListener('change', (e) => {
             if (e.target.checked) {
@@ -3300,6 +3358,8 @@
         });
 
         document.getElementById('bulk-apply-btn').addEventListener('click', applyBulkStatus);
+        document.getElementById('add-service-btn').addEventListener('click', addServiceOption);
+        document.getElementById('save-telegram-btn').addEventListener('click', saveTelegramSettings);
 
         // Analytics toggle
         document.getElementById('toggle-analytics').addEventListener('click', () => {
@@ -3319,9 +3379,6 @@
                 currentFilter = {};
 
                 if (filter === 'my-leads') currentFilter.myLeads = true;
-                else if (filter === 'urgent') currentFilter.tag = 'urgent';
-                else if (filter === 'follow-up') currentFilter.tag = 'follow-up';
-                else if (filter === 'hot') currentFilter.tag = 'hot';
 
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                 this.classList.add('active');
@@ -3337,19 +3394,6 @@
                 renderView();
             });
         });
-
-        // Tag selection (prevent double toggle)
-        const tagSelector = document.getElementById('tag-selector');
-        if (tagSelector) {
-            tagSelector.addEventListener('click', (e) => {
-                const option = e.target.closest('.tag-option');
-                if (!option) return;
-                e.preventDefault();
-                const checkbox = option.querySelector('input');
-                checkbox.checked = !checkbox.checked;
-                option.classList.toggle('selected', checkbox.checked);
-            });
-        }
 
         // Export
         document.getElementById('export-nav-btn').addEventListener('click', () => {
@@ -3519,6 +3563,8 @@
         });
 
         initializeTheme();
+        updateServiceDropdowns();
+        renderServiceList();
         updateNetworkStatus();
         registerServiceWorker();
         setupDeleteDropZone();
