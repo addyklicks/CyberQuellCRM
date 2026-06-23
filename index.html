@@ -842,6 +842,35 @@
             background: rgba(0, 98, 65, 0.1);
         }
 
+        .column-footer-action {
+            width: 100%;
+            min-height: 38px;
+            border: 1px dashed rgba(0, 98, 65, 0.28);
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--watercourse);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            transition: all var(--transition-fast);
+        }
+
+        .column-footer-action:hover {
+            background: rgba(0, 98, 65, 0.08);
+            border-color: rgba(0, 98, 65, 0.48);
+        }
+
+        body.dark-mode .column-footer-action {
+            background: rgba(15, 23, 42, 0.72);
+            border-color: rgba(34, 211, 238, 0.3);
+            color: var(--humming-bird);
+        }
+
         /* Lead Cards */
         .lead-card {
             background: var(--white);
@@ -2810,6 +2839,10 @@
                             ? `<button class="empty-state column-empty-action" type="button" onclick="addLeadToColumn('${column.id}')"><i class="fas fa-plus"></i><p>Create a lead</p></button>`
                             : columnLeads.map(lead => renderLeadCard(lead)).join('')
                         }
+                        ${column.id === 'new'
+                            ? `<button class="column-footer-action" type="button" onclick="addLeadToColumn('new')"><i class="fas fa-plus"></i><span>Add lead</span></button>`
+                            : ''
+                        }
                     </div>
                 `;
 
@@ -3386,6 +3419,18 @@
         document.getElementById('modal-close').addEventListener('click', closeLeadModal);
         document.getElementById('cancel-btn').addEventListener('click', closeLeadModal);
         document.getElementById('add-lead-btn').addEventListener('click', () => openLeadModal());
+        leadModal.addEventListener('pointerdown', (e) => {
+            if (e.target === leadModal) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+        leadModal.addEventListener('click', (e) => {
+            if (e.target === leadModal) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
 
         // View tabs
         document.querySelectorAll('.view-tab').forEach(tab => {
