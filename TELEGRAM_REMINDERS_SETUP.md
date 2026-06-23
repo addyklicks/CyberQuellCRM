@@ -138,7 +138,6 @@ function buildReminder_(lead, reminder) {
     company: stringValue_(fields.company),
     contact: stringValue_(fields.contactName),
     email: stringValue_(fields.email),
-    phone: stringValue_(fields.phone),
     service: stringValue_(fields.serviceType),
     status: stringValue_(fields.status)
   };
@@ -151,7 +150,7 @@ function buildTelegramMessage_(reminders) {
       `${item.label}: ${missedText}`,
       `Lead: ${item.name}`,
       `Company: ${item.company || '-'}`,
-      `Contact: ${item.contact || item.email || item.phone || '-'}`,
+      `Contact: ${item.contact || item.email || '-'}`,
       `Service: ${item.service || '-'}`,
       `Stage: ${item.status || '-'}`,
       `Due date: ${item.dueDate}`

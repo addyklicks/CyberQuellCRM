@@ -1949,12 +1949,6 @@
                                 <input type="email" id="lead-email" placeholder="e.g., contact@acme.com">
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="lead-phone">Phone</label>
-                                <input type="tel" id="lead-phone" placeholder="e.g., +1 (555) 123-4567">
-                            </div>
-                        </div>
                     </div>
                     <div class="modal-section">
                         <h3 class="modal-section-title">Lead Details</h3>
@@ -1962,17 +1956,6 @@
                             <div class="form-group">
                                 <label for="lead-service">Service</label>
                                 <select id="lead-service"></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="lead-status">Status</label>
-                                <select id="lead-status">
-                                    <option value="new">New</option>
-                                    <option value="first-followup">1st Followup</option>
-                                    <option value="second-followup">2nd Followup</option>
-                                    <option value="negotiation">Negotiation</option>
-                                    <option value="won">Won</option>
-                                    <option value="lost">Lost</option>
-                                </select>
                             </div>
                         </div>
                         <div class="form-row">
@@ -2137,6 +2120,7 @@
         let currentFilter = {};
         let currentView = 'kanban';
         let editingLeadId = null;
+        let newLeadStatus = 'new';
         let unsubscribeLeads = null;
         let unsubscribeTeam = null;
         let unsubscribeSettings = null;
@@ -2144,6 +2128,7 @@
         let lastRenderedLeadIds = [];
         let serviceOptions = [...DEFAULT_SERVICE_OPTIONS];
         const selectedLeadIds = new Set();
+        const LEAD_DRAFT_STORAGE_KEY = 'cq-crm-new-lead-draft';
 
         // DOM Elements
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -2643,7 +2628,7 @@
                     const existing = leads.find(l => l.id === leadData.id);
                     if (!canEditLead(existing)) {
                         showToast('You do not have permission to edit this lead', 'error');
-                        return;
+                        return false;
                     }
                 }
                 if (leadData.id) {
@@ -2654,6 +2639,7 @@
                         updatedBy: currentUser.uid
                     });
                     showToast('Lead updated successfully', 'success');
+                    return true;
                 } else {
                     // Create new lead
                     delete leadData.id;
@@ -2664,10 +2650,12 @@
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     showToast('Lead created successfully', 'success');
+                    return true;
                 }
             } catch (error) {
                 console.error('Save lead error:', error);
                 showToast('Failed to save lead', 'error');
+                return false;
             }
         }
 
@@ -3173,8 +3161,68 @@
         // Modal Functions
         // =====================================
 
-        function openLeadModal(leadId = null) {
+        function getLeadDraftData() {
+            return {
+                name: document.getElementById('lead-name').value.trim(),
+                company: document.getElementById('lead-company').value.trim(),
+                contactName: document.getElementById('lead-contact-name').value.trim(),
+                email: document.getElementById('lead-email').value.trim(),
+                serviceType: document.getElementById('lead-service').value,
+                assignee: document.getElementById('lead-assignee').value,
+                firstFollowup: document.getElementById('lead-first-followup').value,
+                secondFollowup: document.getElementById('lead-second-followup').value,
+                notes: document.getElementById('lead-notes').value.trim(),
+                status: normalizeStatus(newLeadStatus),
+                savedAt: new Date().toISOString()
+            };
+        }
+
+        function saveLeadDraft() {
+            if (editingLeadId || !leadModal.classList.contains('active')) return;
+            try {
+                localStorage.setItem(LEAD_DRAFT_STORAGE_KEY, JSON.stringify(getLeadDraftData()));
+            } catch (error) {
+                console.warn('Unable to save lead draft locally:', error);
+            }
+        }
+
+        function restoreLeadDraft() {
+            if (editingLeadId) return;
+
+            try {
+                const rawDraft = localStorage.getItem(LEAD_DRAFT_STORAGE_KEY);
+                if (!rawDraft) return;
+
+                const draft = JSON.parse(rawDraft);
+                if (!draft || typeof draft !== 'object') return;
+
+                newLeadStatus = normalizeStatus(draft.status || newLeadStatus);
+                document.getElementById('lead-name').value = draft.name || '';
+                document.getElementById('lead-company').value = draft.company || '';
+                document.getElementById('lead-contact-name').value = draft.contactName || '';
+                document.getElementById('lead-email').value = draft.email || '';
+                updateServiceDropdowns(draft.serviceType || serviceOptions[0]);
+                document.getElementById('lead-assignee').value = draft.assignee || currentUser.uid;
+                document.getElementById('lead-first-followup').value = draft.firstFollowup || '';
+                document.getElementById('lead-second-followup').value = draft.secondFollowup || '';
+                document.getElementById('lead-notes').value = draft.notes || '';
+            } catch (error) {
+                console.warn('Unable to restore lead draft locally:', error);
+                clearLeadDraft();
+            }
+        }
+
+        function clearLeadDraft() {
+            try {
+                localStorage.removeItem(LEAD_DRAFT_STORAGE_KEY);
+            } catch (error) {
+                console.warn('Unable to clear lead draft locally:', error);
+            }
+        }
+
+        function openLeadModal(leadId = null, defaultStatus = 'new') {
             editingLeadId = leadId;
+            newLeadStatus = normalizeStatus(defaultStatus);
             const lead = leadId ? leads.find(l => l.id === leadId) : null;
 
             document.getElementById('modal-title').textContent = lead ? 'Edit Lead' : 'Add New Lead';
@@ -3186,13 +3234,15 @@
             document.getElementById('lead-company').value = lead?.company || '';
             document.getElementById('lead-contact-name').value = lead?.contactName || '';
             document.getElementById('lead-email').value = lead?.email || '';
-            document.getElementById('lead-phone').value = lead?.phone || '';
-            document.getElementById('lead-status').value = normalizeStatus(lead?.status);
             updateServiceDropdowns(lead?.serviceType || serviceOptions[0]);
             document.getElementById('lead-assignee').value = lead?.assignee || currentUser.uid;
             document.getElementById('lead-first-followup').value = lead?.firstFollowup || '';
             document.getElementById('lead-second-followup').value = lead?.secondFollowup || '';
             document.getElementById('lead-notes').value = lead?.notes || '';
+
+            if (!lead) {
+                restoreLeadDraft();
+            }
 
             // Activities
             if (lead?.activities) {
@@ -3222,6 +3272,7 @@
         function closeLeadModal() {
             leadModal.classList.remove('active');
             editingLeadId = null;
+            newLeadStatus = 'new';
             leadForm.reset();
             setFormReadOnly(false);
         }
@@ -3258,8 +3309,7 @@
         }
 
         function addLeadToColumn(status) {
-            openLeadModal();
-            document.getElementById('lead-status').value = status;
+            openLeadModal(null, status);
         }
 
         // Make function global for onclick
@@ -3279,8 +3329,9 @@
                 company: document.getElementById('lead-company').value.trim(),
                 contactName: document.getElementById('lead-contact-name').value.trim(),
                 email: document.getElementById('lead-email').value.trim(),
-                phone: document.getElementById('lead-phone').value.trim(),
-                status: normalizeStatus(document.getElementById('lead-status').value),
+                status: editingLeadId
+                    ? normalizeStatus(leads.find(l => l.id === editingLeadId)?.status)
+                    : normalizeStatus(newLeadStatus),
                 serviceType: document.getElementById('lead-service').value,
                 assignee: document.getElementById('lead-assignee').value,
                 firstFollowup: document.getElementById('lead-first-followup').value || null,
@@ -3298,9 +3349,15 @@
                     }]
             };
 
-            await saveLead(leadData);
-            closeLeadModal();
+            const saved = await saveLead(leadData);
+            if (saved) {
+                if (!editingLeadId) clearLeadDraft();
+                closeLeadModal();
+            }
         });
+
+        leadForm.addEventListener('input', saveLeadDraft);
+        leadForm.addEventListener('change', saveLeadDraft);
 
         // Delete lead
         document.getElementById('delete-lead-btn').addEventListener('click', async () => {
@@ -3329,7 +3386,6 @@
         document.getElementById('modal-close').addEventListener('click', closeLeadModal);
         document.getElementById('cancel-btn').addEventListener('click', closeLeadModal);
         document.getElementById('add-lead-btn').addEventListener('click', () => openLeadModal());
-        leadModal.addEventListener('click', (e) => { if (e.target === leadModal) closeLeadModal(); });
 
         // View tabs
         document.querySelectorAll('.view-tab').forEach(tab => {
