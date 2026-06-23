@@ -2856,7 +2856,7 @@
             const safeName = escapeHTML(lead.name || 'Untitled');
             const safeCompany = escapeHTML(lead.company || '');
             const safeContact = escapeHTML(lead.contactName || lead.email || 'No contact');
-            const safeService = escapeHTML(lead.serviceType || lead.leadPurpose || 'Unassigned service');
+            const safeService = escapeHTML(lead.serviceType || 'Unassigned service');
             const followupDatesHtml = renderFollowupDates(lead);
             const statusOptions = COLUMNS.map(column => `
                 <option value="${column.id}" ${normalizeStatus(lead.status) === column.id ? 'selected' : ''}>
@@ -2906,7 +2906,7 @@
                 const safeName = escapeHTML(lead.name || 'Untitled');
                 const safeCompany = escapeHTML(lead.company || '-');
                 const safeContact = escapeHTML(lead.contactName || lead.email || '-');
-                const safeService = escapeHTML(lead.serviceType || lead.leadPurpose || '-');
+                const safeService = escapeHTML(lead.serviceType || '-');
 
                 return `
                     <tr data-lead-id="${lead.id}">
@@ -3188,7 +3188,7 @@
             document.getElementById('lead-email').value = lead?.email || '';
             document.getElementById('lead-phone').value = lead?.phone || '';
             document.getElementById('lead-status').value = normalizeStatus(lead?.status);
-            updateServiceDropdowns(lead?.serviceType || lead?.leadPurpose || serviceOptions[0]);
+            updateServiceDropdowns(lead?.serviceType || serviceOptions[0]);
             document.getElementById('lead-assignee').value = lead?.assignee || currentUser.uid;
             document.getElementById('lead-first-followup').value = lead?.firstFollowup || '';
             document.getElementById('lead-second-followup').value = lead?.secondFollowup || '';
