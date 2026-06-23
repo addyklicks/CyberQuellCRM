@@ -2350,10 +2350,12 @@
         document.getElementById('google-signin-btn').addEventListener('click', async () => {
             try {
                 const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
                 await auth.signInWithPopup(provider);
             } catch (error) {
                 if (error.code === 'auth/popup-blocked') {
                     const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.setCustomParameters({ prompt: 'select_account' });
                     await auth.signInWithRedirect(provider);
                 } else {
                     console.error('Sign in error:', error);
@@ -2362,8 +2364,14 @@
             }
         });
 
-        // Silently handle any pending redirect result on page load
-        auth.getRedirectResult().catch(() => {});
+        auth.getRedirectResult().catch((error) => {
+            console.error('Redirect sign in error:', error);
+            if (error.code === 'auth/missing-or-invalid-nonce' || error.message?.includes('missing initial state')) {
+                showToast('Could not finish Google sign-in. Please refresh and try again in Safari.', 'error');
+                return;
+            }
+            showToast('Could not finish sign-in. Please try again.', 'error');
+        });
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
             try {
